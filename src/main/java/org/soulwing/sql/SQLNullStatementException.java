@@ -1,5 +1,5 @@
 /*
- * File created on Aug 5, 2015
+ * File created on Aug 6, 2015
  *
  * Copyright (c) 2015 Carl Harris, Jr
  * and others as noted
@@ -16,23 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.soulwing.sql.source;
+package org.soulwing.sql;
 
-import java.io.Closeable;
-import java.io.IOException;
+import org.soulwing.sql.source.SQLSource;
 
 /**
- * A source of SQL statements.
- *
+ * An exception thrown when an {@link SQLSource} contains no statements.
  * @author Carl Harris
  */
-public interface SQLSource extends Closeable, AutoCloseable {
-
-  /**
-   * Gets the next statement from this source.
-   * @return statement or {@code null} if the end of the source has been reached
-   * @throws SQLInputException
-   */
-  String next() throws SQLInputException;
-
+public class SQLNullStatementException extends SQLRuntimeException {
 }

@@ -1,5 +1,5 @@
 /*
- * File created on Aug 5, 2015
+ * File created on Aug 8, 2015
  *
  * Copyright (c) 2015 Carl Harris, Jr
  * and others as noted
@@ -16,23 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.soulwing.sql.source;
+package org.soulwing.sql;
 
-import java.io.Closeable;
-import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * A source of SQL statements.
- *
+ * DESCRIBE THE TYPE HERE
  * @author Carl Harris
  */
-public interface SQLSource extends Closeable, AutoCloseable {
+public interface ResultSetExtractor<T> {
 
-  /**
-   * Gets the next statement from this source.
-   * @return statement or {@code null} if the end of the source has been reached
-   * @throws SQLInputException
-   */
-  String next() throws SQLInputException;
+  T extract(ResultSet rs) throws SQLException;
 
 }

@@ -16,23 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.soulwing.sql.source;
-
-import java.io.Closeable;
-import java.io.IOException;
+package org.soulwing.sql;
 
 /**
- * A source of SQL statements.
+ * An exception thrown when a single-row query returns more than one row.
  *
  * @author Carl Harris
  */
-public interface SQLSource extends Closeable, AutoCloseable {
+public class SQLNonUniqueResultException extends SQLRuntimeException {
 
-  /**
-   * Gets the next statement from this source.
-   * @return statement or {@code null} if the end of the source has been reached
-   * @throws SQLInputException
-   */
-  String next() throws SQLInputException;
+  public SQLNonUniqueResultException() {
+    super("expected exactly 1 row");
+  }
 
 }

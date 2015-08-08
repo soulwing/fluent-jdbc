@@ -70,8 +70,9 @@ class Lexer implements Closeable {
     }
     else {
       token = doNext();
+      if (token == null) return null;
       text = new StringBuilder();
-      while (token.type == Token.Type.STATEMENT_TEXT) {
+      while (token != null && token.type == Token.Type.STATEMENT_TEXT) {
         text.append((char) token.value);
         token = doNext();
       }

@@ -28,8 +28,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
-import org.soulwing.sql.SQLRuntimeException;
-
 /**
  * A {@link SQLSource} that reads from a resource.
  *
@@ -40,145 +38,204 @@ public class ResourceSQLSource extends ReaderSQLSource {
   public static final String DEFAULT_ENCODING = "UTF-8";
 
   /**
-   * Constructs a new SQL source for a resource relative to the root of the
+   * Constructs a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath which will be accessing using the thread context
+   *    class loader
+   * @param encoding character set name
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public ResourceSQLSource(URL location, String encoding) {
+    super(openReader(location, encoding));
+  }
+
+  /**
+   * Creates a new SQL source for a resource in the same package as the given
+   * class, which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param relativeToClass class that provides the package location of the
+   *    resource
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, Class<?> relativeToClass) {
+    return with(name, relativeToClass, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource in the same package as the given
+   * class which uses the specified encoding.
+   * @param name name of the resource
+   * @param relativeToClass class that provides the package location of the
+   *    resource
+   * @param encoding character set name
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, Class<?> relativeToClass,
+      String encoding) {
+    return with(name, new ClassResourceAccessor(relativeToClass), encoding);
+  }
+
+  /**
+   * Creates a new SQL source for a resource relative to the root of the
+   * given class loader, which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param classLoader class loader that will be used to access the resource
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ClassLoader classLoader) {
+    return with(name, classLoader, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource relative to the root of the
+   * given class loader, which uses the specified encoding.
+   * @param name name of the resource
+   * @param classLoader class loader that will be used to access the resource
+   * @param encoding character set name
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ClassLoader classLoader,
+      String encoding) {
+    return with(name, new ClassLoaderResourceAccessor(classLoader), encoding);
+  }
+
+  /**
+   * Creates a new SQL source for a resource that will be obtained from the
+   * given resource accessor and which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param accessor accessor that will be used to obtain a URL for the resource
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ResourceAccessor accessor) {
+    return with(name, accessor, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource that will be obtained from the
+   * given resource accessor and which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param accessor accessor that will be used to obtain a URL for the resource
+   * @param encoding character set name
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ResourceAccessor accessor,
+      String encoding) {
+    return with(accessor.getResource(name), encoding);
+  }
+
+  /**
+   * Creates a new SQL source for a resource relative to the root of the
    * classpath, which uses the {@link #DEFAULT_ENCODING default encoding}.
    * <p>
    * The resource will be located using the thread context class loader.
    *
-   * @param resourceName name of the resource
+   * @param location URL for the resource; may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
    */
-  public ResourceSQLSource(String resourceName) {
-    this(resourceName, DEFAULT_ENCODING);
+  public static ResourceSQLSource with(String location) {
+    return with(location, DEFAULT_ENCODING);
   }
 
   /**
-   * Constructs a new source SQL for a resource relative to the root of the
+   * Creates a new SQL source for a resource relative to the root of the
    * classpath, which uses the specified encoding.
    * <p>
    * The resource will be located using the thread context class loader.
    *
-   * @param resourceName name of the resource
+   * @param location URL for the resource; may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
    * @param encoding character set name
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
    */
-  public ResourceSQLSource(String resourceName, String encoding) {
-    this(resourceName, Thread.currentThread().getContextClassLoader(), encoding);
+  public static ResourceSQLSource with(String location, String encoding) {
+    return with(URI.create(location), encoding);
   }
 
   /**
-   * Constructs a new SQL source for a resource in the same package as the given
-   * class which uses the {@link #DEFAULT_ENCODING default encoding}.
-   * @param resourceName name of the resource
-   * @param relativeToClass class that provides the package location of the
-   *    resource
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
    */
-  public ResourceSQLSource(String resourceName, Class<?> relativeToClass) {
-    this(resourceName, relativeToClass, DEFAULT_ENCODING);
+
+  public static ResourceSQLSource with(URI location) {
+    return with(location, DEFAULT_ENCODING);
   }
 
   /**
-   * Constructs a new SQL source for a resource in the same package as the given
-   * class which uses the specified encoding.
-   * @param resourceName name of the resource
-   * @param relativeToClass class that provides the package location of the
-   *    resource
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
    * @param encoding character set name
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
    */
-  public ResourceSQLSource(String resourceName, Class<?> relativeToClass,
-      String encoding) {
-    this(resourceName, new ClassResourceAccessor(relativeToClass),
-        encoding);
+  public static ResourceSQLSource with(URI location, String encoding) {
+    return new ResourceSQLSource(translate(location), encoding);
   }
 
   /**
-   * Constructs a new SQL source for a resource relative to the root of the
-   * given class loader, which uses the {@link #DEFAULT_ENCODING default encoding}.
-   * @param resourceName name of the resource
-   * @param classLoader class loader that will be used to access the resource
-   */
-  public ResourceSQLSource(String resourceName, ClassLoader classLoader) {
-    this(resourceName, classLoader, DEFAULT_ENCODING);
-  }
-
-  /**
-   * Constructs a new SQL source for a resource relative to the root of the
-   * given class loader, which uses the specified encoding.
-   * @param resourceName name of the resource
-   * @param classLoader class loader that will be used to access the resource
-   * @param encoding character set name
-   */
-  public ResourceSQLSource(String resourceName, ClassLoader classLoader,
-      String encoding) {
-    this(resourceName, new ClassLoaderResourceAccessor(classLoader),
-        encoding);
-  }
-
-  /**
-   * Constructs a new SQL source for a resource that will be obtained by the
-   * given resource accessor and which uses the {@link #DEFAULT_ENCODING default encoding}.
-   * @param resourceName name of the resource
-   * @param accessor accessor that will be used to obtain a URL for the resource
-   */
-  public ResourceSQLSource(String resourceName, ResourceAccessor accessor) {
-    this(resourceName, accessor, DEFAULT_ENCODING);
-  }
-
-  /**
-   * Constructs a new SQL source for a resource that will be obtained by the
-   * given resource accessor and which uses the specified encoding.
-   * @param resourceName name of the resource
-   * @param accessor accessor that will be used to obtain a URL for the resource
-   * @param encoding character set name
-   */
-  public ResourceSQLSource(String resourceName, ResourceAccessor accessor,
-      String encoding) {
-    this(accessor.getResource(resourceName), encoding);
-  }
-
-  /**
-   * Constructs a new SQL source for a resource at the specified location,
-   * which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
    * @param location location of the resource; this URL may use the
    *    {@code classpath:} scheme to specify a resource relative to the
    *    root of the classpath which will be accessing using the thread context
    *    class loader
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
    */
-  public ResourceSQLSource(URI location) {
-    this(location, DEFAULT_ENCODING);
+  public static ResourceSQLSource with(URL location) {
+    return new ResourceSQLSource(location, DEFAULT_ENCODING);
   }
 
   /**
-   * Constructs a new SQL source for a resource at the specified location,
+   * Creates a new SQL source for a resource at the specified location,
    * which uses the specified encoding.
    * @param location location of the resource; this URL may use the
    *    {@code classpath:} scheme to specify a resource relative to the
    *    root of the classpath which will be accessing using the thread context
    *    class loader
    * @param encoding character set name
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
    */
-  public ResourceSQLSource(URI location, String encoding) {
-    super(openReader(translate(location), encoding));
-  }
-
-  /**
-   * Constructs a new SQL source for a resource at the specified location,
-   * which uses the {@link #DEFAULT_ENCODING default encoding}.
-   * @param location location of the resource
-   */
-  public ResourceSQLSource(URL location) {
-    this(location, DEFAULT_ENCODING);
-  }
-
-  /**
-   * Constructs a new SQL source for a resource at the specified location,
-   * which uses the specified encoding.
-   * @param location location of the resource; this URL may use the
-   *    {@code classpath:} scheme to specify a resource relative to the
-   *    root of the classpath which will be accessing using the thread context
-   *    class loader
-   * @param encoding character set name
-   */
-  public ResourceSQLSource(URL location, String encoding) {
-    super(openReader(location, encoding));
+  public static ResourceSQLSource with(URL location, String encoding) {
+    return new ResourceSQLSource(location, encoding);
   }
 
   /**
@@ -199,6 +256,9 @@ public class ResourceSQLSource extends ReaderSQLSource {
     URL getResource(String name) throws SQLResourceNotFoundException;
   }
 
+  /**
+   * A {@link ResourceAccessor} based on a {@link ClassLoader}.
+   */
   private static class ClassLoaderResourceAccessor implements ResourceAccessor {
     private final ClassLoader classLoader;
 
@@ -217,6 +277,9 @@ public class ResourceSQLSource extends ReaderSQLSource {
 
   }
 
+  /**
+   * A {@link ResourceAccessor} based on a {@link Class}.
+   */
   private static class ClassResourceAccessor implements ResourceAccessor {
     private final Class clazz;
 
@@ -240,6 +303,7 @@ public class ResourceSQLSource extends ReaderSQLSource {
    * <p>
    * The JDK URL class doesn't support the {@code classpath:} scheme, so we
    * translate it here, if necessary.
+   *
    * @param uri the URL to translate
    * @return translated URL
    * @throws SQLResourceNotFoundException if a {@code classpath:} URL refers
@@ -273,8 +337,8 @@ public class ResourceSQLSource extends ReaderSQLSource {
   /**
    * Opens an input stream to a resource.
    * @param location location of the resource
-   * @param encoding en
-   * @return
+   * @param encoding character set name
+   * @return buffered reader for the stream
    */
   private static Reader openReader(URL location, String encoding) {
     try {
@@ -289,6 +353,5 @@ public class ResourceSQLSource extends ReaderSQLSource {
     }
 
   }
-
 
 }

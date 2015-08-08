@@ -48,25 +48,8 @@ public class ResourceSQLSourceTest {
   private static final String UTF_16 = "UTF-16BE";
 
   @Test
-  public void testResourceLocationUsingTCCL() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
-        TEST_PATH + NAME_UTF8);
-    assertThat(source.next(), is(equalTo(TEXT_UTF8)));
-    source.close();
-  }
-
-  @Test
-  public void testResourceLocationUsingTCCLAndEncoding() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
-        TEST_PATH + NAME_UTF16, UTF_16);
-    final String next = source.next();
-    assertThat(next, is(equalTo(TEXT_UTF16)));
-    source.close();
-  }
-
-  @Test
   public void testResourceLocationUsingClass() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
+    final ResourceSQLSource source = ResourceSQLSource.with(
         NAME_UTF8, getClass());
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF8)));
@@ -75,7 +58,7 @@ public class ResourceSQLSourceTest {
 
   @Test
   public void testResourceLocationUsingClassAndEncoding() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
+    final ResourceSQLSource source =ResourceSQLSource.with(
         NAME_UTF16, getClass(), UTF_16);
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF16)));
@@ -84,7 +67,7 @@ public class ResourceSQLSourceTest {
 
   @Test
   public void testResourceLocationUsingClassLoader() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
+    final ResourceSQLSource source = ResourceSQLSource.with(
         TEST_PATH + NAME_UTF8, getClass().getClassLoader());
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF8)));
@@ -93,7 +76,7 @@ public class ResourceSQLSourceTest {
 
   @Test
   public void testResourceLocationUsingClassLoaderAndEncoding() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
+    final ResourceSQLSource source = ResourceSQLSource.with(
         TEST_PATH + NAME_UTF16, getClass().getClassLoader(), UTF_16);
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF16)));
@@ -102,8 +85,8 @@ public class ResourceSQLSourceTest {
 
   @Test
   public void testResourceLocationUsingClasspathUri() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
-        URI.create("classpath:" + TEST_PATH + NAME_UTF8));
+    final ResourceSQLSource source = ResourceSQLSource.with(
+       "classpath:" + TEST_PATH + NAME_UTF8);
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF8)));
     source.close();
@@ -111,8 +94,8 @@ public class ResourceSQLSourceTest {
 
   @Test
   public void testResourceLocationUsingClasspathUriAndEncoding() throws Exception {
-    final ResourceSQLSource source = new ResourceSQLSource(
-        URI.create("classpath:" + TEST_PATH + NAME_UTF16), UTF_16);
+    final ResourceSQLSource source = ResourceSQLSource.with(
+        "classpath:" + TEST_PATH + NAME_UTF16, UTF_16);
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF16)));
     source.close();

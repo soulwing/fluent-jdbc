@@ -10,7 +10,7 @@ However, if you're building apps based on Java EE 7, using `JdbcTemplate`
 brings in an awful lot of Spring machinery that you don't really need.
 
 This project focuses on the subset of SQL template features needed to perform
-tasks like database migration (e.g. using [Flyway] (http://flywaydb.org) and 
+tasks like database migration (e.g. using [Flyway] (http://flywaydb.org)) and 
 data loading. The assumption here is that you're going to be using JPA for most 
 of your interaction with the database, but you need to do a little plain old SQL 
 here and there and want that to be as simple to do as possible.

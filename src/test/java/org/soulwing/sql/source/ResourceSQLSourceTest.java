@@ -22,10 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import java.net.URI;
-import java.net.URL;
-
-import org.junit.Assert;
 import org.junit.Test;
 
 /**

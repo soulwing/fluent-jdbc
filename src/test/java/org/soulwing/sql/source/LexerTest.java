@@ -29,7 +29,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.soulwing.sql.source.Lexer.Token;
 
@@ -40,7 +39,6 @@ import org.soulwing.sql.source.Lexer.Token;
 public class LexerTest {
 
   private static final String TEST_PATH = "lexerTest/";
-
 
   @Test
   public void testBasicStatement() throws Exception {

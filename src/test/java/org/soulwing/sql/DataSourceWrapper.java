@@ -29,10 +29,11 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 /**
- * DESCRIBE THE TYPE HERE
+ * A wrapper for a {@link DataSource} with connection management API.
+ *
  * @author Carl Harris
  */
-public class DataSourceWrapper implements DataSource, DataSourceProvider {
+public class DataSourceWrapper implements DataSource {
 
   private final Set<Connection> connections = new HashSet<>();
 
@@ -40,11 +41,6 @@ public class DataSourceWrapper implements DataSource, DataSourceProvider {
 
   public DataSourceWrapper(DataSource dataSource) {
     this.dataSource = dataSource;
-  }
-
-  @Override
-  public DataSource getDataSource() {
-    return this;
   }
 
   public void connectionClosed(Connection connection) {

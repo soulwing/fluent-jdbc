@@ -18,13 +18,9 @@
  */
 package org.soulwing.sql;
 
-import java.io.File;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -32,10 +28,11 @@ import javax.sql.DataSource;
 import org.hsqldb.jdbc.JDBCDataSource;
 
 /**
- * DESCRIBE THE TYPE HERE
+ * An abstraction for an HSQLDB test database.
+ *
  * @author Carl Harris
  */
-class TestDatabase implements DataSourceProvider {
+class TestDatabase {
 
   private final String ID = UUID.randomUUID().toString();
 
@@ -59,7 +56,6 @@ class TestDatabase implements DataSourceProvider {
     }
   }
 
-  @Override
   public DataSource getDataSource() {
     return dataSource;
   }

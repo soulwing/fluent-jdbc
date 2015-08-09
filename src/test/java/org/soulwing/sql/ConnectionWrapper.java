@@ -38,7 +38,8 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
- * A wrapper for a {@link Connection}.
+ * A wrapper for a {@link Connection} that notifies a {@link DataSourceWrapper}
+ * about connection state.
  *
  * @author Carl Harris
  */

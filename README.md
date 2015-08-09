@@ -39,7 +39,10 @@ Getting Started
 ===============
 
 The `SQLTemplate` class provides the central API you use to perform SQL 
-operations.  It is a plain old Java object, with a constructor that takes
+operations.  See the [Javadocs] (http://soulwing.github.io/sql-template/maven-site/apidocs/)
+for full details of the API.  
+
+It is a plain old Java object, with a constructor that takes
 a JDBC `DataSource`.  An instance of `SQLTemplate` is thread safe and thus
 can be used by any number of application components concurrently.
 

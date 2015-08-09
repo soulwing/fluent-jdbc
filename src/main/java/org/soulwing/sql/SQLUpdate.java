@@ -21,7 +21,7 @@ package org.soulwing.sql;
 import org.soulwing.sql.source.SQLSource;
 
 /**
- * An SQL query operation.
+ * An SQL update operation.
  *
  * @author Carl Harris
  */

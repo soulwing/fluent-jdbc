@@ -88,11 +88,8 @@ public class ColumnExtractor<T> {
 
   @SuppressWarnings("unchecked")
   private T extract(ResultSet rs, int columnIndex) throws SQLException {
-    if (Date.class.isAssignableFrom(type)) {
-      return (T) rs.getDate(columnIndex);
-    }
-    if (Time.class.isAssignableFrom(type)) {
-      return (T) rs.getTime(columnIndex);
+    if (String.class.equals(type)) {
+      return (T) rs.getString(columnIndex);
     }
     if (int.class.equals(type) || Integer.class.equals(type)) {
       return (T) (Integer) rs.getInt(columnIndex);
@@ -114,6 +111,12 @@ public class ColumnExtractor<T> {
     }
     if (byte.class.equals(type) || Byte.class.equals(type)) {
       return (T) (Byte) rs.getByte(columnIndex);
+    }
+    if (Date.class.isAssignableFrom(type)) {
+      return (T) rs.getDate(columnIndex);
+    }
+    if (Time.class.isAssignableFrom(type)) {
+      return (T) rs.getTime(columnIndex);
     }
     return rs.getObject(columnIndex, type);
   }

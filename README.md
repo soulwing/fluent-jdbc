@@ -385,9 +385,13 @@ The `update` method returns the number of rows affected by the given statement.
 
 ### Executing Queries and Updates Repeatedly
 
-Often statements that query or update the database need to be executed 
-repeatedly, with different parameters. For these situations, the query and
-update builders provide a `repeatedly` method which is used to configure
+Normally, `SQLTemplate` closes the underlying JDBC statement and database 
+connection after the statement has been executed (using `execute`, 
+`retrieveList`, or `retrieveValue`) and the result has been retrieved. 
+
+However, sometimes you want to query or update the database repeatedly, using
+the same statement, with different parameters.  For these situations, the query 
+and update builders provide a `repeatedly` method which is used to configure
 the query or update so that it can be executed as many times as needed.
 
 When configured for repeated execution, the SQL is parsed once, and

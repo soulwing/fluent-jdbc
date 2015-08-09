@@ -94,6 +94,15 @@ public class ColumnExtractor<T> {
     if (Time.class.isAssignableFrom(type)) {
       return (T) rs.getTime(columnIndex);
     }
+    if (int.class.equals(type) || Integer.class.equals(type)) {
+      return (T) (Integer) rs.getInt(columnIndex);
+    }
+    if (long.class.equals(type) || Long.class.equals(type)) {
+      return (T) (Long) rs.getLong(columnIndex);
+    }
+    if (boolean.class.equals(type) || Boolean.class.equals(type)) {
+      return (T) (Boolean) rs.getBoolean(columnIndex);
+    }
     if (double.class.equals(type) || Double.class.equals(type)) {
       return (T) (Double) rs.getDouble(columnIndex);
     }
@@ -105,9 +114,6 @@ public class ColumnExtractor<T> {
     }
     if (byte.class.equals(type) || Byte.class.equals(type)) {
       return (T) (Byte) rs.getByte(columnIndex);
-    }
-    if (boolean.class.equals(type) || Boolean.class.equals(type)) {
-      return (T) (Boolean) rs.getBoolean(columnIndex);
     }
     return rs.getObject(columnIndex, type);
   }

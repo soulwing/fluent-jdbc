@@ -35,7 +35,6 @@ abstract class AbstractPreparedStatementExecutor<T> implements SQLExecutor<T> {
   private final PreparedStatementCreator psc;
   private final List<Parameter> parameters;
 
-
   public AbstractPreparedStatementExecutor(PreparedStatementCreator psc,
       List<Parameter> parameters) {
     this.psc = psc;
@@ -44,20 +43,12 @@ abstract class AbstractPreparedStatementExecutor<T> implements SQLExecutor<T> {
 
   @Override
   public T execute(DataSource dataSource) throws SQLException {
-    PreparedStatement statement = psc.getPreparedStatement();
-    if (statement == null) {
-      statement = psc.prepareStatement(dataSource.getConnection());
-    }
+    PreparedStatement statement = psc.prepareStatement(dataSource);
     int index = 1;
     for (Parameter parameter : parameters) {
       parameter.inject(index++, statement);
     }
     return doExecute(statement);
-  }
-
-  @Override
-  public void close() throws SQLException {
-    psc.close();
   }
 
   protected abstract T doExecute(PreparedStatement statement)

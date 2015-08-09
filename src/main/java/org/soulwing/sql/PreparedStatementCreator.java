@@ -18,80 +18,31 @@
  */
 package org.soulwing.sql;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.soulwing.sql.source.SQLSource;
+import javax.sql.DataSource;
 
 /**
- * A lazy creator for a {@link PreparedStatement}.
+ * An object responsible for creating and caching a {@link PreparedStatement}.
  *
  * @author Carl Harris
  */
-public class PreparedStatementCreator {
-
-  private final Lock lock = new ReentrantLock();
-
-  private final String sql;
-
-  private Connection connection;
-
-  private volatile PreparedStatement statement;
-
-  private PreparedStatementCreator(String sql) {
-    this.sql = sql;
-  }
-
-  public static PreparedStatementCreator with(String sql) {
-    return new PreparedStatementCreator(sql);
-  }
-
-  public static PreparedStatementCreator with(SQLSource source) {
-    return new PreparedStatementCreator(SourceUtils.getSingleStatement(source));
-  }
-
-  /**
-   * Gets the previously prepared statement, if any.
-   * @return prepared statement or {@code null} if no statement has been
-   *    prepared
-   */
-  public PreparedStatement getPreparedStatement() {
-    return statement;
-  }
+public interface PreparedStatementCreator extends AutoCloseable {
 
   /**
    * Prepares a statement for the SQL associated with this creator.
-   * @param connection connection to use
-   * @return prepared statement; if the SQL has already been prepared, the
-   *    previously created prepared statement is returned
+   * @param dataSource connection to use
+   * @return prepared statement; if a statement has already been prepared, the
+   *    previously created prepared statement should returned
    * @throws SQLException
    */
-  public PreparedStatement prepareStatement(Connection connection)
-      throws SQLException {
-    if (statement == null) {
-      lock.lock();
-      try {
-        if (statement == null) {
-          this.connection = connection;
-          this.statement = connection.prepareStatement(sql);
-        }
-      }
-      finally {
-        lock.unlock();
-      }
-    }
-    return statement;
-  }
+  PreparedStatement prepareStatement(DataSource dataSource) throws SQLException;
 
   /**
-   * Closes the statement and connection associated with this creator.
+   * Closes the statement and associated connection.
+   * @throws SQLException
    */
-  public void close() {
-    SQLUtils.closeQuietly(statement);
-    SQLUtils.closeQuietly(connection);
-  }
+  void close() throws SQLException;
 
 }

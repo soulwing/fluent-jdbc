@@ -45,7 +45,7 @@ public class SQLTemplateBean implements SQLTemplate {
    */
   @Override
   public void execute(String sql) {
-    final PreparedStatementCreator psc = PreparedStatementCreator.with(sql);
+    final PreparedStatementCreator psc = StatementPreparer.with(sql);
     final StatementExecutor executor = new StatementExecutor(psc);
     try {
       executor.execute(dataSourceProvider.getDataSource());
@@ -54,8 +54,7 @@ public class SQLTemplateBean implements SQLTemplate {
       throw new SQLRuntimeException(ex);
     }
     finally {
-      SQLUtils.closeQuietly(executor);
-      psc.close();
+      SQLUtils.closeQuietly(psc);
     }
   }
 
@@ -104,7 +103,6 @@ public class SQLTemplateBean implements SQLTemplate {
     }
     finally {
       SQLUtils.closeQuietly(rs);
-      SQLUtils.closeQuietly(executor);
     }
   }
 
@@ -114,12 +112,12 @@ public class SQLTemplateBean implements SQLTemplate {
   @Override
   public <T> T query(String sql, Parameter[] params,
       ResultSetExtractor<T> extractor) {
-    PreparedStatementCreator psc = PreparedStatementCreator.with(sql);
+    PreparedStatementCreator psc = StatementPreparer.with(sql);
     try {
       return query(psc, params, extractor);
     }
     finally {
-      psc.close();
+      SQLUtils.closeQuietly(psc);
     }
   }
 
@@ -136,8 +134,37 @@ public class SQLTemplateBean implements SQLTemplate {
    * {@inheritDoc}
    */
   @Override
+  public <T> List<T> query(PreparedStatementCreator psc,
+      ColumnExtractor<T> extractor, Parameter... parameters) {
+    return query(psc, parameters, new MultipleRowExtractor<>(
+        new ColumnExtractingResultSetExtractor<>(extractor)));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <T> List<T> query(String sql, ColumnExtractor<T> extractor,
+      Parameter... parameters) {
+    return query(sql, parameters, new MultipleRowExtractor<>(
+        new ColumnExtractingResultSetExtractor<>(extractor)));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <T> List<T> query(SQLSource source, ColumnExtractor<T> extractor,
+      Parameter... parameters) {
+    return query(SourceUtils.getSingleStatement(source), extractor, parameters);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public <T> List<T> query(PreparedStatementCreator psc, Parameter[] params,
-      final RowMapper<T> rowMapper) {
+      RowMapper<T> rowMapper) {
     return query(psc, params, new MultipleRowExtractor<>(
         new RowMappingResultSetExtractor<>(rowMapper)));
   }
@@ -147,7 +174,7 @@ public class SQLTemplateBean implements SQLTemplate {
    */
   @Override
   public <T> List<T> query(String sql, Parameter[] params,
-      final RowMapper<T> rowMapper) {
+      RowMapper<T> rowMapper) {
     return query(sql, params, new MultipleRowExtractor<>(
         new RowMappingResultSetExtractor<>(rowMapper)));
   }
@@ -232,9 +259,6 @@ public class SQLTemplateBean implements SQLTemplate {
     catch (SQLException ex) {
       throw new SQLRuntimeException(ex);
     }
-    finally {
-      SQLUtils.closeQuietly(executor);
-    }
   }
 
   /**
@@ -242,12 +266,12 @@ public class SQLTemplateBean implements SQLTemplate {
    */
   @Override
   public int update(String sql, Parameter... params) {
-    final PreparedStatementCreator psc = PreparedStatementCreator.with(sql);
+    final PreparedStatementCreator psc = StatementPreparer.with(sql);
     try {
       return update(psc, params);
     }
     finally {
-      psc.close();
+      SQLUtils.closeQuietly(psc);
     }
   }
 

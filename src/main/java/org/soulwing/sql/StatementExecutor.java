@@ -47,20 +47,8 @@ class StatementExecutor implements SQLExecutor<Void> {
    */
   @Override
   public Void execute(DataSource dataSource) throws SQLException {
-    PreparedStatement statement = psc.getPreparedStatement();
-    if (statement == null) {
-      statement =  psc.prepareStatement(dataSource.getConnection());
-    }
-    statement.execute();
+    psc.prepareStatement(dataSource).execute();
     return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void close() throws SQLException {
-    psc.close();
   }
 
 }

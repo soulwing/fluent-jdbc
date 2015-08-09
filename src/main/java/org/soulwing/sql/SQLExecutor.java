@@ -24,25 +24,18 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 /**
- * A callback that executes some JDBC operation using a {@link Connection}.
+ * A callback that executes some JDBC operation.
  *
  * @author Carl Harris
  */
 public interface SQLExecutor<T> {
 
   /**
-   * Executes some JDBC operation by obtaining a connection from the given
-   * connection.
-   * @param dataSource the connection to use for the operation
+   * Executes some JDBC operation.
+   * @param dataSource data source from which a connection is to be obtained
    * @return any result of the operation
-   * @throws SQLException
+   * @throws SQLException as needed
    */
   T execute(DataSource dataSource) throws SQLException;
-
-  /**
-   * Closes any JDBC resources associated with this executor.
-   * @throws SQLException
-   */
-  void close() throws SQLException;
 
 }

@@ -94,6 +94,57 @@ public interface SQLTemplate {
    * SQL string or source may be more convenient.
    *
    * @param psc prepared statement creator
+   * @param extractor column extractor for the desired column
+   * @param parameters substitution parameters for placeholders in the query
+   *   to an instance of type {@code T}
+   * @return the list of column values produced by the query
+   */
+  <T> List<T> query(PreparedStatementCreator psc, ColumnExtractor<T> extractor,
+      Parameter... parameters);
+
+  /**
+   * Executes a query statement to produce a collection of objects.
+   * <p>
+   * This method is designed to allow efficient repeated execution of the
+   * same SQL statement (using the given prepared statement creator).  For
+   * statements that will be executed just once, the methods that take an
+   * SQL string or source may be more convenient.
+   *
+   * @param sql SQL for the statement to execute
+   * @param extractor column extractor for the desired column
+   * @param parameters substitution parameters for placeholders in the query
+   *   to an instance of type {@code T}
+   * @return the list of column values produced by the query
+   */
+  <T> List<T> query(String sql, ColumnExtractor<T> extractor,
+      Parameter... parameters);
+
+  /**
+   * Executes a query statement to produce a collection of objects.
+   * <p>
+   * This method is designed to allow efficient repeated execution of the
+   * same SQL statement (using the given prepared statement creator).  For
+   * statements that will be executed just once, the methods that take an
+   * SQL string or source may be more convenient.
+   *
+   * @param source source for the SQL statement to execute
+   * @param extractor column extractor for the desired column
+   * @param parameters substitution parameters for placeholders in the query
+   *   to an instance of type {@code T}
+   * @return the list of column values produced by the query
+   */
+  <T> List<T> query(SQLSource source, ColumnExtractor<T> extractor,
+      Parameter... parameters);
+
+  /**
+   * Executes a query statement to produce a collection of objects.
+   * <p>
+   * This method is designed to allow efficient repeated execution of the
+   * same SQL statement (using the given prepared statement creator).  For
+   * statements that will be executed just once, the methods that take an
+   * SQL string or source may be more convenient.
+   *
+   * @param psc prepared statement creator
    * @param parameters substitution parameters for placeholders in the query
    * @param rowMapper an object that maps a row in a {@link java.sql.ResultSet}
    *   to an instance of type {@code T}

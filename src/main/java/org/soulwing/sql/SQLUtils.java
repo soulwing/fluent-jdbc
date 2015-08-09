@@ -76,22 +76,8 @@ class SQLUtils {
   }
 
   /**
-   * Closes an executor without throwing {@link SQLException}.
-   * @param executor the executor set to close (may be null)
-   */
-  public static void closeQuietly(SQLExecutor<?> executor) {
-    if (executor == null) return;
-    try {
-      executor.close();
-    }
-    catch (SQLException ex) {
-      ex.printStackTrace(System.out);
-    }
-  }
-
-  /**
-   * Closes a source without throwing {@link SQLException}.
-   * @param source the source set to close (may be null)
+   * Closes a source without throwing {@link IOException}.
+   * @param source the source to close (may be null)
    */
   public static void closeQuietly(SQLSource source) {
     if (source == null) return;
@@ -103,5 +89,18 @@ class SQLUtils {
     }
   }
 
+  /**
+   * Closes a prepared statement creator without throwing {@link SQLException}.
+   * @param psc the prepared statement creator to close (may be null)
+   */
+  public static void closeQuietly(PreparedStatementCreator psc) {
+    if (psc == null) return;
+    try {
+      psc.close();
+    }
+    catch (SQLException ex) {
+      ex.printStackTrace(System.out);
+    }
+  }
 
 }

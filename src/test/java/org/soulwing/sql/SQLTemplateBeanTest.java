@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -30,9 +31,13 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
+import org.jmock.auto.Auto;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soulwing.sql.source.StringSQLSource;
@@ -300,6 +305,34 @@ public class SQLTemplateBeanTest {
       result.close();
     }
 
+  }
+
+  @Test
+  public void testUpdateAndQueryUsingPreparedStatementCreator()
+      throws Exception {
+    final String[] words = { "bar", "baz", "bif"};
+
+    template.execute("CREATE TABLE foo ( text VARCHAR(255) )");
+    try (StatementPreparer preparer = StatementPreparer.with(
+        "INSERT INTO foo(text) VALUES(?)")) {
+      for (String word : words) {
+        template.update(preparer, Parameter.with(word));
+      }
+    }
+
+    final List<String> results = template.query(
+        "SELECT * FROM foo ORDER BY text", ColumnExtractor.with(String.class));
+
+    assertThat(results, is(equalTo(Arrays.asList(words))));
+
+    try (StatementPreparer preparer = StatementPreparer.with(
+        "SELECT text FROM foo WHERE text = ?")) {
+      for (String word : words) {
+        String result = template.queryForObject(preparer,
+            ColumnExtractor.with(String.class), Parameter.with(word));
+        assertThat(result, is(equalTo(word)));
+      }
+    }
   }
 
 }

@@ -169,6 +169,24 @@ in your code, in addition to not having to handle `SQLException` yourself.
 For queries that return a single row, `SQLTemplate` provides the 
 `queryForObject` method for getting a Java object from a single row.
 
+You can use a `RowMapper` to turn the resulting row of a single row query
+into an object:
+
+```
+Person person = sqlTemplate.queryForObject(
+    "SELECT * FROM person WHERE id = ?", 
+    new Parameters[] { Parameter.with(2) },
+    new RowMapper<Person>() { 
+      public void mapRow(ResultSet rs, int rowNum) throws SQLException {
+        Person person = new Person();
+        person.setId(rs.getLong("id"));
+        person.setName(rs.getString("name"));
+        person.setAge(rs.getInt("age"));
+        return person;
+      }
+    });
+```
+
 Often, you want to query and get a single column value.  The `ColumnExtractor`
 class provides the mechanism for you to describe the column.
 
@@ -194,23 +212,6 @@ int max = sqlTemplate.queryForObject(
     ColumnExtractor.with(2, int.class));
 ```
 
-You can also use a `RowMapper` for a single row query.
-
-```
-Person person = sqlTemplate.queryForObject(
-    "SELECT * FROM person WHERE id = ?", 
-    new Parameters[] { Parameter.with(2) },
-    new RowMapper<Person>() { 
-      public void mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Person person = new Person();
-        person.setId(rs.getLong("id"));
-        person.setName(rs.getString("name"));
-        person.setAge(rs.getInt("age"));
-        return person;
-      }
-    });
-```
-
 > You should use `queryForObject` only when you expect exactly one row. If the
 > query returns no rows, the `SQLNoResultException` will be thrown. If the
 > query returns more than one row, the `SQLNonUniqueResultException` will be
@@ -227,47 +228,62 @@ sqlTemplate.update("UPDATE person SET age = age + 1 WHERE id = ?",
     Parameter.with(2));
 ```    
 
+The `update` method returns the number of rows affected by the given statement.
+
+
 ### Reusing Prepared Statements for Queries and Updates
 
 Often statements that query or update the database need to be executed 
-repeatedly, with different parameters.  For these situations, each of the
+repeatedly, with different parameters. For these situations, each of the
 query and update methods on `SQLTemplate` allows you to pass a 
-`PreparedStatementCreator` instead of passing an SQL statement.
+*statement preparer* instead of passing an SQL statement.
 
-The SQL associated with a `PreparedStatementCreator` is parsed once, and
+The SQL associated with a statement preparer is parsed once, and
 the resulting JDBC statement object and associated connection are cached until
-the creator object is closed.  This allows you to repeatedly pass the same 
-`PreparedStatementCreator` instance to a query or update method, while passing
-different parameters to be bound before each execution of the the prepared
-statement.
+the preparer is closed. This allows you to repeatedly pass the same statement 
+preparer to a query or update method, while passing different parameters to be 
+bound before each execution of the the prepared statement.
 
-For example, suppose you are importing information from a CSV file.  For each
+The provided `StatementPreparer` class provides factory methods for creating
+thread-safe lazy statement preparing objects. It has methods for preparing a 
+statement from SQL in a string, or from an `SQLSource`. You could also make
+your own statement preparer by implementing the `PreparedStatementCreator`
+interface.
+
+Suppose you are importing information from a CSV file. For each
 line in the CSV file, you want to execute the same `INSERT` statement, with
-different values.  This could be accomplished as follows:
+different values. This could be accomplished as follows:
 
 ```
-PreparedStatementCreator psc = PreparedStatementCreator.with(
-    "INSERT INTO person(id, name, age) VALUES(?, ?, ?)");
+final File csvFile = new File("people.csv");
+final String sql = "INSERT INTO person(id, name, age) VALUES(?, ?, ?)";
 
-CSVReader reader = new CSVReader(new File("people.csv"));
-while (reader.hasNext()) {
-  CSV csv = reader.next();
-  sqlTemplate.update(psc, Parameter.with(Long.valueOf(csv.get(0))),
-       Parameter.with(csv.get(2)), Parameter.with(Integer.valueOf(csv.get(2))));
+try (StatementPreparer preparer = StatementPreparer.with(sql);
+  CSVReader reader = new CSVReader(csvFile)) {
+  while (reader.hasNext()) {
+    CSV csv = reader.next();
+    sqlTemplate.update(preparer, Parameter.with(Long.valueOf(csv.get(0))),
+         Parameter.with(csv.get(2)), Parameter.with(Integer.valueOf(csv.get(2))));
+  }  
 }
-
-reader.close();
-psc.close();  
 ```
 
-> It is important to close `PreparedStatementCreator` objects when you no longer
-> need them, to release the database connection and related resources it holds.
+> It is important to close a statement preparer when you no longer need it, so 
+> that the database connection and other JDBC objects it holds can be released. 
+> As shown here, a convenient way to make sure the preparer is closed is to
+> use the Java 7 *try-with-resources* construct.  Of course, you could also
+> accomplish the same thing using a *try-finally* construct. 
 
  
-### Putting SQL for Queries and Updates in Files
+### Using files for SQL for Queries and Updates
 
 Just as you can with the `execute` method, you can put your SQL query or
-update statements in files and use an `SQLSource` to access them:
+update statements in files and use an `SQLSource` to access them.  This 
+makes your code cleaner and easier to understand.  Also, with some careful
+organization of your resources, you can easily write code that handles
+multiple database dialects.
+
+Using `SQLSource` with the query and update methods is easy: 
 
 ```
 long id = 2;
@@ -281,3 +297,6 @@ sqlTemplate.update(
     ResourceSQLSource.with("classpath:sql/updates/updatePersonAgeById.sql"),
     Parameter.with(age), Parameter.with(id));
 ```
+
+Each passed `SQLSource` is used to read a single statement, and then the
+source is closed.

@@ -15,8 +15,9 @@ assumption here is that you're going to be using JPA for all of your typical
 interaction with the database, and that you need to do a little plain old SQL 
 here and there and want that to be as simple to do as possible.
 
-This library is small and depends only on the JDBC features of the JDK -- i.e.
-it adds a single (and small) JAR file dependency to your Java EE application.
+This library is lightweight and depends only on the JDBC features of the 
+JDK -- i.e. using this SQL template requires only a single (and small) JAR 
+file dependency in your Java EE application.
 
 
 Getting Started

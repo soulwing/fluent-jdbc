@@ -19,5 +19,8 @@
 
 /**
  * SQL source code input support
+ * <p>
+ * This package provides supporting classes for reading SQL statements from
+ * files or other resources that can be located using a URL.
  */
 package org.soulwing.sql.source;

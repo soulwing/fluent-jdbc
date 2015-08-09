@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * A {@link SQLSource} that reads statements from a {@link Reader}.
+ * An {@link SQLSource} that reads statements from a {@link Reader}.
  *
  * @author Carl Harris
  */

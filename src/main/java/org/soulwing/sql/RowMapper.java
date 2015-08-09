@@ -23,7 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * An object that maps a row in a {@link ResultSet} to an instance of a given
+ * An closure that maps a row in a {@link ResultSet} to an instance of a given
  * type.
  *
  * @param <T> the type of object produced by this mapper

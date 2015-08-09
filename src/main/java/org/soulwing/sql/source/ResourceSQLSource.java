@@ -29,7 +29,8 @@ import java.net.URI;
 import java.net.URL;
 
 /**
- * A {@link SQLSource} that reads from a resource.
+ * An {@link SQLSource} that reads SQL statements from a resource that can be
+ * located using a URL.
  *
  * @author Carl Harris
  */

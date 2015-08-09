@@ -1,5 +1,5 @@
 /*
- * File created on Aug 5, 2015
+ * File created on Aug 9, 2015
  *
  * Copyright (c) 2015 Carl Harris, Jr
  * and others as noted
@@ -16,26 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.soulwing.sql.source;
-
-import java.io.Closeable;
-import java.io.IOException;
 
 /**
- * A source of SQL statements.
+ * SQL template and supporting classes
  * <p>
- * An instance of this type abstracts the details of reading the text of an
- * SQL source file and parsing it into a sequence of statements.
- *
- * @author Carl Harris
+ * This package provides the public API {@link org.soulwing.sql.SQLTemplate}
+ * and its supporting classes.*
  */
-public interface SQLSource extends Closeable, AutoCloseable {
-
-  /**
-   * Gets the next statement from this source.
-   * @return statement or {@code null} if the end of the source has been reached
-   * @throws SQLInputException
-   */
-  String next() throws SQLInputException;
-
-}
+package org.soulwing.sql;

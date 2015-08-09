@@ -24,10 +24,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 
 /**
- * An extractor for a column value.
- * <p>
- * An instance of this type extracts a single column value from the
- * current row position of a {@link ResultSet}.
+ * A closure that extracts a single column value from a {@link ResultSet}.
  *
  * @author Carl Harris
  */

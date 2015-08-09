@@ -24,8 +24,12 @@ import java.util.List;
 import org.soulwing.sql.source.SQLSource;
 
 /**
- * A template for performing SQL operations, inspired by Spring's 
- * {@code JdbcTemplate}.
+ * A high level API for performing SQL operations using JDBC.
+ * <p>
+ * The design of this interface was heavily influenced by the
+ * {@code JdbcTemplate} abstraction in the Spring Framework.  Although it
+ * differs in some areas, users of {@code JdbcTemplate} should find it
+ * familiar enough to easily learn.
  *
  * @author Carl Harris
  */

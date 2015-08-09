@@ -21,7 +21,7 @@ package org.soulwing.sql.source;
 import org.soulwing.sql.SQLRuntimeException;
 
 /**
- * An exception thrown by an {@link SQLSource} when a resource cannot be found.
+ * An exception thrown by an {@link SQLSource} when the resource cannot be found.
  *
  * @author Carl Harris
  */

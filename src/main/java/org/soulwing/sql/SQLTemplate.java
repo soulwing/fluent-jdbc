@@ -31,6 +31,16 @@ import org.soulwing.sql.source.SQLSource;
 /**
  * A thread-safe {@link SQLOperations} implementation.
  * <p>
+ * This class must be constructed with a {@link DataSource} that will be used
+ * as necessary to obtain connections to the database.
+ * <pre>
+ * import javax.sql.DataSource;
+ * import org.soulwing.sql.SQLTemplate;
+ *
+ * DataSource dataSource = ...  // typically injected or retrieved via JNDI
+ * SQLTemplate sqlTemplate = new SQLTemplate(dataSource);
+ * </pre>
+ *
  * A single instance of this class can be concurrently shared by an arbitrary
  * number of application components.
  *

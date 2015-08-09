@@ -21,7 +21,7 @@ package org.soulwing.sql.source;
 import java.io.StringReader;
 
 /**
- * An {@link SQLSource} that reads statements from a string.
+ * An {@link SQLSource} that reads SQL statements from a string.
  *
  * @author Carl Harris
  */

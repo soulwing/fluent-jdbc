@@ -25,9 +25,10 @@ import org.soulwing.sql.source.SQLSource;
  * A high level API for performing SQL operations using JDBC.
  * <p>
  * The design of this interface was heavily influenced by the
- * {@code JdbcTemplate} abstraction in the Spring Framework.  Although it
- * differs in some areas, users of {@code JdbcTemplate} should find it
- * familiar enough to easily learn.
+ * {@code JdbcTemplate} abstraction in the Spring Framework, however it
+ * differs significantly, particularly in the manner in which queries and
+ * updates are invoked.  Nonetheless, users of {@code JdbcTemplate} should
+ * find it familiar enough to easily learn.
  *
  * @author Carl Harris
  */
@@ -54,11 +55,11 @@ public interface SQLOperations {
   /**
    * Creates a query that returns nothing.
    * <p>
-   * This is a synonym for {@link #queryForType(Class) with {@link Void}
+   * This is a synonym for {@link #queryForType(Class)} with {@link Void}
    * as the specified type.  A query obtained via this method is typically
-   * configured to use a {@link ResultSetHandler } to process returned rows.
+   * configured to use a {@link ResultSetHandler} to process returned rows.
    *
-   * @return query object that can be configured and executed to retreive
+   * @return query object that can be configured and executed to retrieve
    *    rows from the database
    */
   SQLQuery<Void> query();

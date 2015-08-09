@@ -28,7 +28,7 @@ import javax.sql.DataSource;
  *
  * @author Carl Harris
  */
-public interface SQLExecutor<T> {
+interface SQLExecutor<T> {
 
   /**
    * Executes some JDBC operation.

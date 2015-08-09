@@ -30,7 +30,19 @@ import java.sql.SQLException;
  * While the {@link #handleResult(ResultSet)} method can return a value, it is
  * not always necessary.  When an implementation does not need to return a
  * value, simply use {@link Void} as the type parameter.
- *
+ * <p>
+ * Example:
+ * <pre>
+ * {@code
+ * ResultSetHandler<Void> handler = new ResultSetHandler<>() {
+ *   public Void handleResult(ResultSet rs) throws SQLException {
+ *     while (rs.next()) {
+ *       exporter.exportPerson(rs.getLong("id"), rs.getString("name"));
+ *     }
+ *     return null;
+ *   }
+ * };
+ * }</pre>
  * @param <T> the type of result returned by the handler
  * @author Carl Harris
  */

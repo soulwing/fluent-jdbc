@@ -23,9 +23,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * An closure that maps a row in a {@link ResultSet} to an instance of a given
+ * A closure that maps a row in a {@link ResultSet} to an instance of a given
  * type.
- *
+ * <p>
+ * Example:
+ * <pre>
+ * {@code
+ * RowMapper<Person> personMapper = new RowMapper<>() {
+ *   public Person mapRow(ResultSet rs, int rowNum) throws SQLException {
+ *     Person person = new Person();
+ *     person.setId(rs.getLong("id"));
+ *     person.setName(rs.getName("name"));
+ *     person.setAge(rs.getInt("age"));
+ *     return person;
+ *   }
+ * };
+ * }</pre>
  * @param <T> the type of object produced by this mapper
  * @author Carl Harris
  */

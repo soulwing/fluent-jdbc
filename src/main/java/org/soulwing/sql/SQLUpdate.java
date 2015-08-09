@@ -22,6 +22,48 @@ import org.soulwing.sql.source.SQLSource;
 
 /**
  * An SQL update operation.
+ * <p>
+ * This API uses the builder pattern to allow an update operation to be easily
+ * configured and executed, using a fluent expression.
+ * <p>
+ * An instance of this type is created using the
+ * {@link SQLOperations#update update} method on the {@link SQLOperations}
+ * interface.  The update operation must be configured with a statement to
+ * execute via the {@link #using(String) using} method.
+ * <p>
+ * Additionally, the update operation can be configured for single execution
+ * (default) or repeated execution.  When an update is configured for repeated
+ * execution (using {@link #repeatedly()}), the underlying statement and
+ * connection objects remain open after the {@link #execute(Parameter...)},
+ * method is invoked, allowing the update operation to be executed again with
+ * different parameter values.  An update operation that is configured
+ * for repeated execution must be closed when it is no longer needed, by
+ * invoking the {@link #close()} method explicitly or by enclosing it in a
+ * <em>try-with-resources</em> construct.
+ * <p>
+ * After the update operation has been configured, it can be executed using
+ * the {@link #execute(Parameter...)} method.
+ * <p>
+ * Examples:
+ * <p>
+ * Updating many rows with a single statement execution:
+ * <pre>
+ * {@code
+ * int count = sqlTemplate.update()
+ *     .using("DELETE FROM person WHERE status = ?")
+ *     .execute(Parameter.with("INACTIVE");
+ * }</pre>
+ * <p>
+ * Repeatedly executing the same update operation with different parameters:
+ * <pre>
+ * {@code
+ * try (SQLUpdate updater = sqlTemplate.update()
+ *     .using("UPDATE person SET age = age + 1 WHERE id = ?")
+ *     .repeatedly()) {
+ *   updater.execute(Parameter.with(1L));
+ *   updater.execute(Parameter.with(4L));
+ * }
+ * }</pre>
  *
  * @author Carl Harris
  */

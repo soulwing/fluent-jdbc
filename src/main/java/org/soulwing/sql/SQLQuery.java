@@ -24,6 +24,118 @@ import org.soulwing.sql.source.SQLSource;
 
 /**
  * An SQL query operation.
+ * <p>
+ * This API uses the builder pattern to allow a query to be easily configured
+ * and executed.  It supports queries that return many rows as well as those
+ * that return a single row.  The API is designed to allow a fluent specification
+ * of the query configuration.
+ * <p>
+ * An instance of this type is created using the {@link SQLOperations#query query}
+ * or {@link SQLOperations#queryForType(Class) queryForType} method on the
+ * {@link SQLOperations} interface.  The user of this interface must configure
+ * at least two characteristics:
+ * <ol>
+ * <li> the SQL statement to execute, specified via the {@link #using(String) using}
+ *      method
+ * <li> the manner in which the results are to be handled; either
+ *      {@linkplain #mappingRowsWith(RowMapper) mapping rows to objects},
+ *      {@linkplain #extractingColumn(int) extracting a column value}, or using a
+ *      {@linkplain #handlingResultWith(ResultSetHandler) result set handler}
+ * </ol>
+ * <p>
+ * Additionally, the query can be configured for single execution (default)
+ * or repeated execution.  When a query is configured for repeated execution
+ * (using {@link #repeatedly()}), the underlying statement and connection
+ * objects remain open after a result is retrieved, allowing the query to be
+ * executed again with different parameter values.  A query that is configured
+ * for repeated execution must be closed when it is no longer needed, by
+ * invoking the {@link #close()} method explicitly or by enclosing it in a
+ * <em>try-with-resources</em> construct.
+ * <p>
+ * After a query has been fully configured, a result can be retrieved using
+ * either
+ * <ul>
+ * <li> {@link #retrieveList(Parameter...)} for a query that returns multiple
+ *      rows, OR
+ * <li> {@link #retrieveValue(Parameter...)} for a query that returns <em>exactly
+ *      one</em> row
+ * </ul>
+ * <p>
+ * Examples:
+ * <p>
+ * Retrieving a list of objects that correspond to the rows returned by
+ * a query using a {@link RowMapper}:
+ * <pre>
+ * {@code
+ * // A mapper that maps column values of a person row to a Person object
+ * RowMapper<Person> personMapper = new RowMapper<Person>() { ... };
+ *
+ * List<Person> results = sqlTemplate.queryForType(Person.class)
+ *     .using("SELECT * FROM person ORDER BY name")
+ *     .mappingRowsWith(personMapper)
+ *     .retrieveList();
+ * }</pre>
+ * <p>
+ * Retrieving a list of values for a given column for all matching rows:
+ * <pre>
+ * {@code
+ * List<String> names = sqlTemplate.queryForType(String.class)
+ *     .using("SELECT * FROM person ORDER BY name")
+ *     .extractingColumn("name")
+ *     .retrieveList();
+ * }</pre>
+ * <p>
+ * Retrieving a single object using a {@link RowMapper}:
+ * <pre>
+ * {@code
+ * // A mapper that maps column values of a person row to a Person object
+ * RowMapper<Person> personMapper = new RowMapper<Person>() { ... };
+ *
+ * long id = 3;  // ID of the person to retrieve
+ * Person person = sqlTemplate.queryForType(Person.class)
+ *     .using("SELECT * FROM person WHERE id = ?")
+ *     .mappingRowsWith(personMapper)
+ *     .retrieveValue(Parameter.with(id));
+ * }</pre>
+ * <p>
+ * Retrieving a single value of a column:
+ * <pre>
+ * {@code
+ * int averageAge = sqlTemplate.queryForType(int.class)
+ *     .using("SELECT AVG(age) FROM person")
+ *     .extractingColumn()
+ *     .retrieveValue();
+ * }</pre>
+ * <p>
+ * Repeatedly executing a query with different parameters:
+ * <pre>
+ * {@code
+ * try (SQLQuery<String> query = sqlTemplate.queryForType(String.class)
+ *     .using("SELECT name FROM person WHERE name LIKE ?")
+ *     .extractingColumn()
+ *     .repeatedly()) {
+ *   System.out.format("matching names: %s",
+ *       query.retrieveList("%en%"));
+ *   System.out.format("matching names: %s",
+ *       query.retrieveList("%sh%"));
+ * }
+ * }</pre>
+ * <p>
+ * Processing the returned result set using a {@link ResultSetHandler}:
+ * <pre>
+ * {@code
+ * sqlTemplate.query()
+ *     .using("SELECT * FROM person ORDER BY id")
+ *     .handlingResultWith(new ResultSetMapper<Void>() {
+ *        public void handleResult(ResultSet rs) throws SQLException {
+ *          while (rs.next()) {
+ *            exporter.exportPerson(rs.getLong("id"), rs.getLong("name"));
+ *          }
+ *          return null;
+ *        }
+ *     })
+ *     .retrieveValue();
+ * }</pre>
  *
  * @author Carl Harris
  */

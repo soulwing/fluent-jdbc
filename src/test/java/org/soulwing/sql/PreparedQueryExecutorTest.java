@@ -42,11 +42,8 @@ public class PreparedQueryExecutorTest
     extends AbstractPreparedStatementExecutorTest<ResultSet> {
 
   @Rule
-  public final JUnitRuleMockery context = new JUnitRuleMockery() {
-    {
-      setImposteriser(ClassImposteriser.INSTANCE);
-    }
-  };
+  public final JUnitRuleMockery context =
+      new JUnitRuleClassImposterizingMockery();
 
   @Mock
   private ResultSet resultSet;

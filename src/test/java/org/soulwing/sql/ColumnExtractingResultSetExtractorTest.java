@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Rule;
@@ -40,11 +41,8 @@ import org.junit.Test;
 public class ColumnExtractingResultSetExtractorTest {
 
   @Rule
-  public final JUnitRuleMockery context = new JUnitRuleMockery() {
-    {
-      setImposteriser(ClassImposteriser.INSTANCE);
-    }
-  };
+  public final JUnitRuleMockery context =
+      new JUnitRuleClassImposterizingMockery();
 
   @Mock
   private ResultSet rs;

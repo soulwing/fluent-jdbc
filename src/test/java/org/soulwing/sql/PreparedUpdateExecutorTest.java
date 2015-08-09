@@ -44,11 +44,8 @@ public class PreparedUpdateExecutorTest
   private static final int COUNT = -1;
 
   @Rule
-  public final JUnitRuleMockery context = new JUnitRuleMockery() {
-    {
-      setImposteriser(ClassImposteriser.INSTANCE);
-    }
-  };
+  public final JUnitRuleMockery context =
+      new JUnitRuleClassImposterizingMockery();
 
   @Override
   protected AbstractPreparedStatementExecutor newExecutor(

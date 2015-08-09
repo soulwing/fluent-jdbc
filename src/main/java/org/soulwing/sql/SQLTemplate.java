@@ -19,285 +19,313 @@
  */
 package org.soulwing.sql;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.soulwing.sql.source.SQLSource;
 
 /**
- * A template for performing SQL operations, inspired by Spring's 
- * {@code JdbcTemplate}.
+ * A thread-safe {@link SQLOperations} implementation.
+ * <p>
+ * A single instance of this class can be concurrently shared by an arbitrary
+ * number of application components.
  *
  * @author Carl Harris
  */
-public interface SQLTemplate {
+public class SQLTemplate implements SQLOperations {
+
+  private final DataSource dataSource;
 
   /**
-   * Executes a single SQL (DDL) statement.
-   * @param sql the SQL statement to execute
+   * Constructs a new template.
+   * @param dataSource data source that will be used to obtain connections to
+   *    the database
    */
-  void execute(String sql);
+  public SQLTemplate(DataSource dataSource) {
+    this.dataSource = dataSource;
+  }
 
   /**
-   * Executes a single SQL (DDL) statement.
-   * @param source source for the SQL statement to execute
+   * {@inheritDoc}
    */
-  void execute(SQLSource source);
+  @Override
+  public void execute(String sql) {
+    final PreparedStatementCreator psc = StatementPreparer.with(sql);
+    final StatementExecutor executor = new StatementExecutor(psc);
+    try {
+      executor.execute(dataSource);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+    finally {
+      SQLUtils.closeQuietly(psc);
+    }
+  }
 
   /**
-   * Executes the sequence of SQL statements produced by the given source.
-   * @param source source of the SQL statements to execute
+   * {@inheritDoc}
    */
-  void executeScript(SQLSource source);
+  @Override
+  public void execute(SQLSource source) {
+    execute(SourceUtils.getSingleStatement(source));
+  }
 
   /**
-   * Executes a query and extracts results using the given extractor.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param psc prepared statement creator
-   * @param parameters parameter values for query placeholders
-   * @param extractor result set extractor to invoke
-   * @return result returned by {@code extractor}
+   * {@inheritDoc}
    */
-  <T> T query(PreparedStatementCreator psc, Parameter[] parameters,
-      ResultSetExtractor<T> extractor);
+  @Override
+  public void executeScript(SQLSource source) {
+    try {
+      String sql = source.next();
+      while (sql != null) {
+        execute(sql);
+        sql = source.next();
+      }
+    }
+    finally {
+      SQLUtils.closeQuietly(source);
+    }
+  }
 
   /**
-   * Executes a query and extracts results using the given extractor.
-   * @param sql the SQL statement to execute
-   * @param parameters parameter values for query placeholders
-   * @param extractor result set extractor to invoke
-   * @return result returned by {@code extractor}
+   * {@inheritDoc}
    */
-  <T> T query(String sql, Parameter[] parameters,
-      ResultSetExtractor<T> extractor);
+  @Override
+  public <T> T query(PreparedStatementCreator psc, Parameter[] params,
+      ResultSetExtractor<T> extractor) {
+    final PreparedQueryExecutor executor =
+        new PreparedQueryExecutor(psc,
+            Arrays.asList(params));
+
+    ResultSet rs = null;
+    try {
+      rs = executor.execute(dataSource);
+      return extractResultSet(rs, extractor);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+    finally {
+      SQLUtils.closeQuietly(rs);
+    }
+  }
 
   /**
-   * Executes a query and extracts results using the given extractor.
-   * @param source source for the SQL statement to execute
-   * @param parameters parameter values for query placeholders
-   * @param extractor result set extractor to invoke
-   * @return result returned by {@code extractor}
+   * {@inheritDoc}
    */
-  <T> T query(SQLSource source, Parameter[] parameters,
-      ResultSetExtractor<T> extractor);
+  @Override
+  public <T> T query(String sql, Parameter[] params,
+      ResultSetExtractor<T> extractor) {
+    PreparedStatementCreator psc = StatementPreparer.with(sql);
+    try {
+      return query(psc, params, extractor);
+    }
+    finally {
+      SQLUtils.closeQuietly(psc);
+    }
+  }
 
   /**
-   * Executes a query statement to produce a collection of objects.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param psc prepared statement creator
-   * @param extractor column extractor for the desired column
-   * @param parameters substitution parameters for placeholders in the query
-   *   to an instance of type {@code T}
-   * @return the list of column values produced by the query
+   * {@inheritDoc}
    */
-  <T> List<T> query(PreparedStatementCreator psc, ColumnExtractor<T> extractor,
-      Parameter... parameters);
+  @Override
+  public <T> T query(SQLSource source, Parameter[] parameters,
+      ResultSetExtractor<T> extractor) {
+    return query(SourceUtils.getSingleStatement(source), parameters, extractor);
+  }
 
   /**
-   * Executes a query statement to produce a collection of objects.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param sql SQL for the statement to execute
-   * @param extractor column extractor for the desired column
-   * @param parameters substitution parameters for placeholders in the query
-   *   to an instance of type {@code T}
-   * @return the list of column values produced by the query
+   * {@inheritDoc}
    */
-  <T> List<T> query(String sql, ColumnExtractor<T> extractor,
-      Parameter... parameters);
+  @Override
+  public <T> List<T> query(PreparedStatementCreator psc,
+      ColumnExtractor<T> extractor, Parameter... parameters) {
+    return query(psc, parameters, new MultipleRowExtractor<>(
+        new ColumnExtractingResultSetExtractor<>(extractor)));
+  }
 
   /**
-   * Executes a query statement to produce a collection of objects.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param source source for the SQL statement to execute
-   * @param extractor column extractor for the desired column
-   * @param parameters substitution parameters for placeholders in the query
-   *   to an instance of type {@code T}
-   * @return the list of column values produced by the query
+   * {@inheritDoc}
    */
-  <T> List<T> query(SQLSource source, ColumnExtractor<T> extractor,
-      Parameter... parameters);
+  @Override
+  public <T> List<T> query(String sql, ColumnExtractor<T> extractor,
+      Parameter... parameters) {
+    return query(sql, parameters, new MultipleRowExtractor<>(
+        new ColumnExtractingResultSetExtractor<>(extractor)));
+  }
 
   /**
-   * Executes a query statement to produce a collection of objects.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param psc prepared statement creator
-   * @param parameters substitution parameters for placeholders in the query
-   * @param rowMapper an object that maps a row in a {@link java.sql.ResultSet}
-   *   to an instance of type {@code T}
-   * @return the list of objects produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> List<T> query(PreparedStatementCreator psc, Parameter[] parameters,
-      RowMapper<T> rowMapper);
+  @Override
+  public <T> List<T> query(SQLSource source, ColumnExtractor<T> extractor,
+      Parameter... parameters) {
+    return query(SourceUtils.getSingleStatement(source), extractor, parameters);
+  }
 
   /**
-   * Executes a query statement to produce a collection of objects.
-   * @param sql SQL for the statement to execute
-   * @param params substitution parameters for placeholders in the query
-   * @param rowMapper an object that maps a row in a {@link java.sql.ResultSet}
-   *   to an instance of type {@code T}
-   * @return the list of objects produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> List<T> query(String sql, Parameter[] params, RowMapper<T> rowMapper);
+  @Override
+  public <T> List<T> query(PreparedStatementCreator psc, Parameter[] params,
+      RowMapper<T> rowMapper) {
+    return query(psc, params, new MultipleRowExtractor<>(
+        new RowMappingResultSetExtractor<>(rowMapper)));
+  }
 
   /**
-   * Executes a query statement to produce a collection of objects.
-   * @param source source for the SQL statement to execute
-   * @param params substitution parameters for placeholders in the query
-   * @param rowMapper an object that maps a row in a {@link java.sql.ResultSet}
-   *   to an instance of type {@code T}
-   * @return the list of objects produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> List<T> query(SQLSource source, Parameter[] params, RowMapper<T> rowMapper);
+  @Override
+  public <T> List<T> query(String sql, Parameter[] params,
+      RowMapper<T> rowMapper) {
+    return query(sql, params, new MultipleRowExtractor<>(
+        new RowMappingResultSetExtractor<>(rowMapper)));
+  }
 
   /**
-   * Executes a query statement to produce a single object.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param psc prepared statement creator
-   * @param extractor column extractor for the desired column
-   * @param parameters substitution parameters for placeholders in the query
-   * @return the object produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> T queryForObject(PreparedStatementCreator psc,
-      ColumnExtractor<T> extractor, Parameter... parameters);
+  @Override
+  public <T> List<T> query(SQLSource source, Parameter[] params,
+      RowMapper<T> rowMapper) {
+    return query(SourceUtils.getSingleStatement(source), params, rowMapper);
+  }
 
   /**
-   * Executes a query statement to produce a single object
-   * @param sql SQL for the statement to execute
-   * @param extractor column extractor for the desired column
-   * @param parameters substitution parameters for placeholders in the query
-   * @return the object produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> T queryForObject(String sql, ColumnExtractor<T> extractor,
-      Parameter... parameters);
+  @Override
+  public <T> T queryForObject(PreparedStatementCreator psc,
+      ColumnExtractor<T> extractor, Parameter... params) {
+    return query(psc, params, new SingleRowExtractor<>(
+        new ColumnExtractingResultSetExtractor<>(extractor)));
+  }
 
   /**
-   * Executes a query statement to produce a single object
-   * @param source SQL for the statement to execute
-   * @param extractor column extractor for the desired column
-   * @param parameters substitution parameters for placeholders in the query
-   * @return the object produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> T queryForObject(SQLSource source, ColumnExtractor<T> extractor,
-      Parameter... parameters);
+  @Override
+  public <T> T queryForObject(String sql, ColumnExtractor<T> extractor,
+      Parameter... parameters) {
+    return query(sql, parameters, new SingleRowExtractor<>(
+        new ColumnExtractingResultSetExtractor<>(extractor)));
+  }
 
   /**
-   * Executes a query statement to produce a single object
-   * <p>
-   * This method is designed to allow efficient repeated execution of the
-   * same SQL statement (using the given prepared statement creator).  For
-   * statements that will be executed just once, the methods that take an
-   * SQL string or source may be more convenient.
-   *
-   * @param psc prepared statement creator
-   * @param parameters substitution parameters for placeholders in the query
-   * @param rowMapper an object that maps the row in a
-   *    {@link java.sql.ResultSet} to an instance of type {@code T}
-   * @return the object produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> T queryForObject(PreparedStatementCreator psc, Parameter[] parameters,
-      RowMapper<T> rowMapper);
+  @Override
+  public <T> T queryForObject(SQLSource source, ColumnExtractor<T> extractor,
+      Parameter... parameters) {
+    return queryForObject(SourceUtils.getSingleStatement(source), extractor,
+        parameters);
+  }
 
   /**
-   * Executes a query statement to produce a single object
-   * @param sql SQL for the statement to execute
-   * @param parameters substitution parameters for placeholders in the query
-   * @param rowMapper an object that maps the row in a
-   *    {@link java.sql.ResultSet} to an instance of type {@code T}
-   * @return the object produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> T queryForObject(String sql, Parameter[] parameters,
-      RowMapper<T> rowMapper);
+  @Override
+  public <T> T queryForObject(PreparedStatementCreator psc,
+      Parameter[] parameters, RowMapper<T> rowMapper) {
+    return query(psc, parameters, new SingleRowExtractor<>(
+        new RowMappingResultSetExtractor<>(rowMapper)));
+  }
 
   /**
-   * Executes a query statement to produce a single object
-   * @param source source for the SQL statement to execute
-   * @param parameters substitution parameters for placeholders in the query
-   * @param rowMapper an object that maps the row in a
-   *    {@link java.sql.ResultSet} to an instance of type {@code T}
-   * @return the object produced by the row mapper for this query
+   * {@inheritDoc}
    */
-  <T> T queryForObject(SQLSource source, Parameter[] parameters,
-      RowMapper<T> rowMapper);
+  @Override
+  public <T> T queryForObject(String sql, Parameter[] parameters,
+      final RowMapper<T> rowMapper) {
+    return query(sql, parameters, new SingleRowExtractor<>(
+        new RowMappingResultSetExtractor<>(rowMapper)));
+  }
 
   /**
-   * Executes an SQL insert, update, or delete statement.
-   * <p>
-   * This method is designed to allow efficient repeated execution of the same
-   * statement with different parameters.  When using this method, the prepared
-   * statement is created lazily and cached so that it can be used again without
-   * needing to repeatedly parse the SQL it contains.
-   * <p>
-   * Note that when using this method, the connection associated with the
-   * prepared statement remains open until the
-   * {@link PreparedStatementCreator#close()} method is invoked on {@code psc}.
-   *
-   * @param psc prepared statement creator
-   * @param params substitution parameters for placeholders in the statement
-   * @return the number of rows affected by executing the statement
+   * {@inheritDoc}
    */
-  int update(PreparedStatementCreator psc, Parameter... params);
+  @Override
+  public <T> T queryForObject(SQLSource source, Parameter[] parameters,
+      RowMapper<T> rowMapper) {
+    return queryForObject(SourceUtils.getSingleStatement(source), parameters,
+        rowMapper);
+  }
+
+  @Override
+  public int update(PreparedStatementCreator psc, Parameter... params) {
+    final PreparedUpdateExecutor executor = new PreparedUpdateExecutor(
+        psc, Arrays.asList(params));
+
+    try {
+      return executor.execute(dataSource);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+  }
 
   /**
-   * Executes an SQL insert, update, or delete statement.
-   * @param sql SQL for the the statement to execute
-   * @param params substitution parameters for placeholders in the statement
-   * @return the number of rows affected by executing the statement
+   * {@inheritDoc}
    */
-  int update(String sql, Parameter... params);
+  @Override
+  public int update(String sql, Parameter... params) {
+    final PreparedStatementCreator psc = StatementPreparer.with(sql);
+    try {
+      return update(psc, params);
+    }
+    finally {
+      SQLUtils.closeQuietly(psc);
+    }
+  }
 
   /**
-   * Executes an SQL insert, update, or delete statement.
-   * @param source source for the SQL for the the statement to execute
-   * @param params substitution parameters for placeholders in the statement
-   * @return the number of rows affected by executing the statement
+   * {@inheritDoc}
    */
-  int update(SQLSource source, Parameter... params);
+  @Override
+  public int update(SQLSource source, Parameter... params) {
+    return update(SourceUtils.getSingleStatement(source), params);
+  }
 
   /**
-   * Executes a call to a stored procedure.
-   * @param sql SQL for the call
-   * @param params substitution parameters that specify the arguments for the 
-   *    call
-   * @return the output parameters specified for the call; the returned
+   * {@inheritDoc}
    */
-  CallResult call(String sql, Parameter... params);
+  @Override
+  public CallResult call(String sql, Parameter... params) {
+    final CallableStatementExecutor executor = new CallableStatementExecutor(
+        sql, Arrays.asList(params));
+    try {
+      executor.execute(dataSource);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+    return executor;
+  }
 
   /**
-   * Executes a call to a stored procedure.
-   * @param source source for the SQL to call
-   * @param params substitution parameters that specify the arguments for the
-   *    call
-   * @return the output parameters specified for the call
+   * {@inheritDoc}
    */
-  CallResult call(SQLSource source, Parameter... params);
+  @Override
+  public CallResult call(SQLSource source, Parameter... params) {
+    return call(SourceUtils.getSingleStatement(source), params);
+  }
+
+  private <T> T extractResultSet(ResultSet rs, ResultSetExtractor<T> extractor) {
+    try {
+      return extractor.extract(rs);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+    finally {
+      SQLUtils.closeQuietly(rs);
+    }
+  }
 
 }

@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -33,32 +32,29 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-import org.jmock.auto.Auto;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soulwing.sql.source.StringSQLSource;
 
 /**
- * Tests for {@link SQLTemplateBean}.
+ * Tests for {@link SQLTemplate}.
  *
  * @author Carl Harris
  */
-public class SQLTemplateBeanTest {
+public class SQLTemplateTest {
 
   private final TestDatabase db = new TestDatabase();
 
-  private final SQLTemplateBean template = new SQLTemplateBean();
+  private SQLTemplate template;
 
   private DataSourceWrapper dataSource;
 
   @Before
   public void setUp() throws Exception {
     dataSource = new DataSourceWrapper(db.getDataSource());
-    template.dataSourceProvider =  dataSource;
+    template = new SQLTemplate(dataSource);
   }
 
   @After

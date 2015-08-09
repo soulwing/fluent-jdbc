@@ -23,8 +23,111 @@ file dependency in your Java EE application.
 Getting Started
 ===============
 
-[Describe how to create an SQLTemplate and show a basic example of using it
-to create a table and insert some data]
+The `SQLTemplate` class provides the central API you use to perform SQL 
+operations.  It is a plain old Java object, with a constructor that takes
+a JDBC `DataSource`.  An instance of `SQLTemplate` is thread safe and thus
+can be used by any number of application components concurrently.
+
+```
+import javax.sql.DataSource;
+import org.soulwing.sql.SQLTemplate;
+
+DataSource dataSource = ... // typically injected by the container
+SQLTemplate sqlTemplate = new SQLTemplate(dataSource);
+```
+
+Using `SQLTemplate` you can easily execute any combination of queries and updates
+as well as SQL DDL statements.  The following simple example creates a table, 
+inserts some values into it, and then queries and prints some results.  
+
+##### `src/test/java/SQLTemplateDemo.java`: 
+```
+1   DataSource dataSource = ... // typically injected by the container
+2   SQLTemplate sqlTemplate = new SQLTemplate(dataSource);
+
+3   sqlTemplate.execute("CREATE TABLE person ( " + 
+       "id BIGINT PRIMARY KEY, name VARCHAR(50), age INTEGER )");
+
+4   sqlTemplate.executeScript(new StringSQLSource(
+       "INSERT INTO PERSON(id, name, age) VALUES(1, 'Jennifer Wilson', 29);" +
+       "INSERT INTO PERSON(id, name, age) VALUES(2, 'Nadine Bennett', 31);" +
+       "INSERT INTO PERSON(id, name, age) VALUES(3, 'Megan Marshall', 27);"
+    ));
+
+5   List<Map<String, Object>> people = sqlTemplate.query("SELECT * FROM person", 
+        new Parameter[0],
+        new RowMapper<Map<String, Object>>() {
+          public Map<String, Object> mapRow(ResultSet rs, int rowNum) 
+              throws SQLException {
+            Map<String, Object> person = new HashMap<>();
+            person.put("id", rs.getLong("id"));
+            person.put("name", rs.getString("name"));
+            person.put("age", rs.getInt("age"));
+            return person;
+          }
+        });
+
+6   System.out.format("people: %s\n", people);
+
+7   StatementPreparer preparer = StatementPreparer.with(
+        "UPDATE person SET age = age + 1 WHERE id = ?");
+8   sqlTemplate.update(preparer, Parameter.with(2));
+9   sqlTemplate.update(preparer, Parameter.with(3));
+
+10  int averageAge = sqlTemplate.queryForObject(
+        "SELECT AVG(age) FROM person", ColumnExtractor.with(int.class));
+    
+11  System.out.format("average age: %d\n", averageAge);
+
+12  int count = sqlTemplate.update("DELETE FROM person");
+
+13  System.out.format("deleted %d people\n", count);
+```
+
+The example demonstrates many of the salient features of `SQLTemplate`.
+
+* Line 2 -- `SQLTemplate` is a POJO that you construct with a `DataSource`
+* Line 3 -- Execute arbitrary SQL DDL or DML statements using `execute`
+* Line 4 -- Execute DDL or DML scripts using an `SQLSource` with 
+  `executeScript`; here we use `StringSQLSource`, but there are useful 
+  implementations that allow the use of files or classpath resources
+* Line 5 -- Execute a query to retrieve a list of objects of arbitrary type
+  using a `RowMapper`
+* Line 7 -- Prepare a statement for efficient repeated use using a 
+  `StatementPreparer` 
+* Line 8 -- Execute an update using a prepared statement and arbitrary 
+  arbitrary parameter values specified using `Parameter.with`
+* Line 10 -- Execute a single row query and extract a column value using 
+  `queryForObject` with a `ColumnExtractor`; here we use an extractor without
+  a column identifier to get the first column, but we can also specify a column
+  by label or index, and optionally an SQL data type
+* Line 12 -- Executing an update returns the number of affected rows
+  
+In addition to the features shown in the demo, `SQLTemplate` provides support
+for calling stored procedures and handling returned values and result sets --
+see [Calling Stored Procedures] for details.
+
+
+### JDBC Exception Handling
+
+The JDBC API is designed such that almost every method throws the checked 
+`SQLException` type.  As observed by others, this isn't very useful, since
+in many circumstances it isn't feasible to recover from an `SQLException`. 
+All components of `SQLTemplate` are designed so to wrap `SQLException` in an 
+unchecked `SQLRuntimeException`.  
+
+Interface methods that your code implements are designed to throw `SQLException`
+so that you don't have to worry about catching it and rethrowing it.  For 
+example, in our demo `RowMapper` we invoked several methods of the 
+`java.sql.ResultSet` interface each of which throws `SQLException`.  When 
+`SQLTemplate` invokes our row mapper, it will take care of catching and
+rethrowing any `SQLException` that occurs.
+
+No effort is made to translate SQL exceptions into more meaningful exception
+types, since the intended use of this library is for utility tasks such as 
+data migration.  If this is a feature of significant interest, it could be
+implemented -- feel free to submit a pull request!
+
 
 Executing SQL DDL and DML Statements
 ====================================

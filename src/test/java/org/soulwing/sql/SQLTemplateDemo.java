@@ -46,32 +46,39 @@ public class SQLTemplateDemo {
             "INSERT INTO PERSON(id, name, age) VALUES(3, 'Megan Marshall', 27);"
     ));
 
-    List<Map<String, Object>> people = sqlTemplate.query("SELECT * FROM person",
-        new Parameter[0],
-        new RowMapper<Map<String, Object>>() {
-          public Map<String, Object> mapRow(ResultSet rs, int rowNum)
-              throws SQLException {
-            Map<String, Object> person = new HashMap<>();
-            person.put("id", rs.getLong("id"));
-            person.put("name", rs.getString("name"));
-            person.put("age", rs.getInt("age"));
-            return person;
-          }
-        });
+    List<Map> people = sqlTemplate.queryForType(Map.class)
+        .using("SELECT * FROM person")
+        .mappingRowsWith(new RowMapper<Map>() {
+            public Map mapRow(ResultSet rs, int rowNum)
+                throws SQLException {
+              Map<String, Object> person = new HashMap<>();
+              person.put("id", rs.getLong("id"));
+              person.put("name", rs.getString("name"));
+              person.put("age", rs.getInt("age"));
+              return person;
+            }
+        })
+        .retrieveList();
 
     System.out.format("people: %s\n", people);
 
-    StatementPreparer preparer = StatementPreparer.with(
-        "UPDATE person SET age = age + 1 WHERE id = ?");
-    sqlTemplate.update(preparer, Parameter.with(2));
-    sqlTemplate.update(preparer, Parameter.with(3));
+    try (SQLUpdate updater = sqlTemplate.update()
+            .using("UPDATE person SET age = age + 1 WHERE id = ?")
+            .repeatedly()) {
+      updater.execute(Parameter.with(2));
+      updater.execute(Parameter.with(3));
+    }
 
-    int averageAge = sqlTemplate.queryForObject(
-        "SELECT AVG(age) FROM person", ColumnExtractor.with(int.class));
+    int averageAge = sqlTemplate.queryForType(int.class)
+        .using("SELECT AVG(age) FROM person")
+        .extractingColumn()
+        .retrieveValue();
 
     System.out.format("average age: %d\n", averageAge);
 
-    int count = sqlTemplate.update("DELETE FROM person");
+    int count = sqlTemplate.update()
+        .using("DELETE FROM person")
+        .execute();
 
     System.out.format("deleted %d people\n", count);
 

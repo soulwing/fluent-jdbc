@@ -28,7 +28,7 @@ import javax.sql.DataSource;
  *
  * @author Carl Harris
  */
-public interface PreparedStatementCreator extends AutoCloseable {
+interface PreparedStatementCreator extends AutoCloseable {
 
   /**
    * Prepares a statement for the SQL associated with this creator.

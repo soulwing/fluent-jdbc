@@ -28,7 +28,7 @@ import java.sql.Time;
  *
  * @author Carl Harris
  */
-public class ColumnExtractor<T> {
+class ColumnExtractor<T> {
 
   private final Object columnId;
   private final Class<T> type;

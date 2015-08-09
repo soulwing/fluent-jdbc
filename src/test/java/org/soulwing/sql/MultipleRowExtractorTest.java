@@ -33,7 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link MultipleRowExtractor}.
+ * Unit tests for {@link MultipleRowHandler}.
  *
  * @author Carl Harris
  */
@@ -46,15 +46,15 @@ public class MultipleRowExtractorTest {
   private ResultSet rs;
 
   @Mock
-  private ResultSetExtractor<Object> delegate;
+  private ResultSetHandler<Object> delegate;
 
-  private MultipleRowExtractor<Object> extractor;
+  private MultipleRowHandler<Object> extractor;
 
   private Object result = new Object();
 
   @Before
   public void setUp() throws Exception {
-    extractor = new MultipleRowExtractor<>(delegate);
+    extractor = new MultipleRowHandler<>(delegate);
   }
 
   @Test
@@ -63,12 +63,12 @@ public class MultipleRowExtractorTest {
       {
         exactly(2).of(rs).next();
         will(onConsecutiveCalls(returnValue(true), returnValue(false)));
-        oneOf(delegate).extract(rs);
+        oneOf(delegate).handleResult(rs);
         will(returnValue(result));
       }
     });
 
-    List<Object> results = extractor.extract(rs);
+    List<Object> results = extractor.handleResult(rs);
     assertThat(results.size(), is(equalTo(1)));
     assertThat(results.contains(result), is(true));
   }

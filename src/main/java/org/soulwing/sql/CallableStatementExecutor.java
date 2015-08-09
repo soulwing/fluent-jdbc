@@ -96,11 +96,11 @@ class CallableStatementExecutor implements SQLExecutor<Boolean>, CallResult {
   }
 
   @Override
-  public <T> T extractResultSet(ResultSetExtractor<T> extractor) {
+  public <T> T extractResultSet(ResultSetHandler<T> extractor) {
     ResultSet rs = null;
     try {
       rs = call.getResultSet();
-      return extractor.extract(rs);
+      return extractor.handleResult(rs);
     }
     catch (SQLException ex) {
       throw new SQLRuntimeException(ex);
@@ -112,20 +112,20 @@ class CallableStatementExecutor implements SQLExecutor<Boolean>, CallResult {
 
   @Override
   public <T> List<T> mapResultSet(RowMapper<T> rowMapper) {
-    return extractResultSet(new MultipleRowExtractor<>(
-        new RowMappingResultSetExtractor<>(rowMapper)));
+    return extractResultSet(new MultipleRowHandler<>(
+        new RowMappingResultSetHandler<>(rowMapper)));
   }
 
   @Override
   public <T> T get(ColumnExtractor<T> columnExtractor) {
-    return extractResultSet(new SingleRowExtractor<>(
-        new ColumnExtractingResultSetExtractor<>(columnExtractor)));
+    return extractResultSet(new SingleRowHandler<>(
+        new ColumnExtractingResultSetHandler<>(columnExtractor)));
   }
 
   @Override
   public <T> T get(RowMapper<T> rowMapper) {
-    return extractResultSet(new SingleRowExtractor<>(
-        new RowMappingResultSetExtractor<>(rowMapper)));
+    return extractResultSet(new SingleRowHandler<>(
+        new RowMappingResultSetHandler<>(rowMapper)));
   }
 
   @Override

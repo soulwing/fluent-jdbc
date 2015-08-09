@@ -22,23 +22,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * A {@link ResultSetExtractor} that extracts a result from (what must be)
+ * A {@link ResultSetHandler} that extracts a result from (what must be)
  * a {@link ResultSet} containing exactly one row.
  *
  * @author Carl Harris
  */
-class SingleRowExtractor<T> implements ResultSetExtractor<T> {
+class SingleRowHandler<T> implements ResultSetHandler<T> {
 
-  private final ResultSetExtractor<T> delegate;
+  private final ResultSetHandler<T> delegate;
 
-  public SingleRowExtractor(ResultSetExtractor<T> delegate) {
+  public SingleRowHandler(ResultSetHandler<T> delegate) {
     this.delegate = delegate;
   }
 
   @Override
-  public T extract(ResultSet rs) throws SQLException {
+  public T handleResult(ResultSet rs) throws SQLException {
     if (rs.next()) {
-      final T result = delegate.extract(rs);
+      final T result = delegate.handleResult(rs);
       if (rs.next()) {
         throw new SQLNonUniqueResultException();
       }

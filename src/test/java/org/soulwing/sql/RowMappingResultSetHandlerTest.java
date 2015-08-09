@@ -27,48 +27,50 @@ import java.sql.ResultSet;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.concurrent.Synchroniser;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link RowMappingResultSetExtractor}.
+ * Unit tests for {@link RowMappingResultSetHandler}.
  *
  * @author Carl Harris
  */
-public class ColumnExtractingResultSetExtractorTest {
+public class RowMappingResultSetHandlerTest {
 
   @Rule
-  public final JUnitRuleMockery context =
-      new JUnitRuleClassImposterizingMockery();
+  public final JUnitRuleMockery context = new JUnitRuleMockery();
 
   @Mock
   private ResultSet rs;
 
   @Mock
-  private ColumnExtractor<Object> delegate;
+  private RowMapper<Object> rowMapper;
 
-  private Object result = new Object();
+  private Object result1 = new Object();
 
-  private ColumnExtractingResultSetExtractor<Object> extractor;
+  private Object result2 = new Object();
+
+  private RowMappingResultSetHandler<Object> extractor;
 
   @Before
   public void setUp() throws Exception {
-    extractor = new ColumnExtractingResultSetExtractor<>(delegate);
+    extractor = new RowMappingResultSetHandler<>(rowMapper);
   }
 
   @Test
   public void testExtract() throws Exception {
     context.checking(new Expectations() {
       {
-        oneOf(delegate).extract(rs);
-        will(returnValue(result));
+        oneOf(rowMapper).mapRow(rs, 1);
+        will(returnValue(result1));
+        oneOf(rowMapper).mapRow(rs, 2);
+        will(returnValue(result2));
       }
     });
 
-    assertThat(extractor.extract(rs), is(sameInstance(result)));
+    assertThat(extractor.handleResult(rs), is(sameInstance(result1)));
+    assertThat(extractor.handleResult(rs), is(sameInstance(result2)));
   }
 
 }

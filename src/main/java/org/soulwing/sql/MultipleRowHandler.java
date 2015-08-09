@@ -24,25 +24,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A {@link ResultSetExtractor} that extracts a list of results from a
+ * A {@link ResultSetHandler} that extracts a list of results from a
  * result set.
  *
  * @author Carl Harris
  */
-class MultipleRowExtractor<T> implements ResultSetExtractor<List<T>> {
+class MultipleRowHandler<T> implements ResultSetHandler<List<T>> {
 
-  private final ResultSetExtractor<T> delegate;
+  private final ResultSetHandler<T> delegate;
 
   private final List<T> results = new LinkedList<>();
 
-  public MultipleRowExtractor(ResultSetExtractor<T> delegate) {
+  public MultipleRowHandler(ResultSetHandler<T> delegate) {
     this.delegate = delegate;
   }
 
   @Override
-  public List<T> extract(ResultSet rs) throws SQLException {
+  public List<T> handleResult(ResultSet rs) throws SQLException {
     while (rs.next()) {
-      results.add(delegate.extract(rs));
+      results.add(delegate.handleResult(rs));
     }
     return results;
   }

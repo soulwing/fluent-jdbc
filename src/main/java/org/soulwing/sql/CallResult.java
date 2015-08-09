@@ -51,7 +51,7 @@ public interface CallResult extends AutoCloseable {
    * @param extractor the subject extractor
    * @return object produced by {@code extractor}
    */
-  <T> T extractResultSet(ResultSetExtractor<T> extractor);
+  <T> T extractResultSet(ResultSetHandler<T> extractor);
 
   /**
    * Maps the current result set using the given row mapper.

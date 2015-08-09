@@ -22,26 +22,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * A closure that extracts a single object result from a {@link ResultSet}.
- * <p>
- * This interface provides the means for an {@link SQLTemplate} query invocation
- * to process the result set in an arbitrary fashion.
- * <p>
- * While the {@link #extract(ResultSet)} method can return a value, it is not
- * always necessary.  When an implementation does not need to return a value,
- * simple use {@link Void} as the type parameter.
+ * A {@link ResultSetHandler} that extracts a column from a row using a
+ * {@link ColumnExtractor}.
  *
- * @param <T> the type of result returned by this extractor
  * @author Carl Harris
  */
-public interface ResultSetExtractor<T> {
+class ColumnExtractingResultSetHandler<T>
+    implements ResultSetHandler<T> {
 
-  /**
-   * Extracts a single object result from a result set.
-   * @param rs the result set to process
-   * @return any value of type {@code T}
-   * @throws SQLException as needed
-   */
-  T extract(ResultSet rs) throws SQLException;
+  private final ColumnExtractor<T> extractor;
+
+  public ColumnExtractingResultSetHandler(ColumnExtractor<T> extractor) {
+    this.extractor = extractor;
+  }
+
+  @Override
+  public T handleResult(ResultSet rs) throws SQLException {
+    return extractor.extract(rs);
+  }
 
 }

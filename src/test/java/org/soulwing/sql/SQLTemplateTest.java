@@ -30,10 +30,12 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soulwing.sql.source.StringSQLSource;
@@ -76,48 +78,68 @@ public class SQLTemplateTest {
         "CREATE TABLE foo ( text1 VARCHAR(255), text2 VARCHAR(255) );" +
             "INSERT INTO foo(text1, text2) VALUES('bar', 'baz')"));
 
-    assertThat(template.queryForObject("SELECT text1, text2 FROM foo",
-        ColumnExtractor.with(2, String.class)), is(equalTo("baz")));
+    String result = template.queryForType(String.class)
+        .using("SELECT text1, text2 FROM foo")
+        .extractingColumn(2)
+        .retrieveValue();
+
+    assertThat(result, is(equalTo("baz")));
   }
 
   @Test
   public void testQueryForObjectByColumnLabel() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( text1 VARCHAR(255), text2 VARCHAR(255) );" +
-        "INSERT INTO foo(text1, text2) VALUES('bar', 'baz')"));
+            "INSERT INTO foo(text1, text2) VALUES('bar', 'baz')"));
 
-    assertThat(template.queryForObject("SELECT text1, text2 FROM foo",
-        ColumnExtractor.with("text2", String.class)), is(equalTo("baz")));
+    String result = template.queryForType(String.class)
+        .using("SELECT text1, text2 FROM foo")
+        .extractingColumn("text2")
+        .retrieveValue();
+
+    assertThat(result, is(equalTo("baz")));
   }
 
   @Test
   public void testQueryForString() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( text VARCHAR(255) );" +
-        "INSERT INTO foo(text) VALUES('bar')"));
+            "INSERT INTO foo(text) VALUES('bar')"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-        ColumnExtractor.with(String.class)), is(equalTo("bar")));
+    String result = template.queryForType(String.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(equalTo("bar")));
   }
 
   @Test
   public void testQueryForInt() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( i INTEGER );" +
-        "INSERT INTO foo(i) VALUES(1)"));
+            "INSERT INTO foo(i) VALUES(1)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-        ColumnExtractor.with(int.class)), is(equalTo(1)));
+    int result = template.queryForType(int.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(equalTo(1)));
   }
 
   @Test
   public void testQueryForLong() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( i BIGINT );" +
-        "INSERT INTO foo(i) VALUES(" + Long.MAX_VALUE + ")"));
+            "INSERT INTO foo(i) VALUES(" + Long.MAX_VALUE + ")"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-        ColumnExtractor.with(long.class)), is(equalTo(Long.MAX_VALUE)));
+    long result = template.queryForType(long.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(equalTo(Long.MAX_VALUE)));
   }
 
   @Test
@@ -126,8 +148,12 @@ public class SQLTemplateTest {
         "CREATE TABLE foo ( i DECIMAL(5,2) );" +
         "INSERT INTO foo(i) VALUES(3.14)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-        ColumnExtractor.with(double.class)), is(equalTo(3.14)));
+    double result = template.queryForType(double.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(equalTo(3.14)));
   }
 
   @Test
@@ -136,20 +162,26 @@ public class SQLTemplateTest {
         "CREATE TABLE foo ( i DECIMAL(5,2) );" +
         "INSERT INTO foo(i) VALUES(3.14)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-            ColumnExtractor.with(BigDecimal.class)),
-        is(equalTo(BigDecimal.valueOf(3.14))));
+    BigDecimal result = template.queryForType(BigDecimal.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(equalTo(BigDecimal.valueOf(3.14))));
   }
 
   @Test
   public void testQueryForJavaUtilDate() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( created TIMESTAMP );" +
-        "INSERT INTO foo(created) VALUES(current_timestamp)"));
+            "INSERT INTO foo(created) VALUES(current_timestamp)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-            ColumnExtractor.with(java.util.Date.class)),
-        is(instanceOf(java.util.Date.class)));
+    java.util.Date result = template.queryForType(java.util.Date.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(instanceOf(java.util.Date.class)));
   }
 
   @Test
@@ -158,19 +190,26 @@ public class SQLTemplateTest {
         "CREATE TABLE foo ( created TIMESTAMP );" +
         "INSERT INTO foo(created) VALUES(current_timestamp)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-            ColumnExtractor.with(Timestamp.class)),
-        is(instanceOf(Timestamp.class)));
+    Timestamp result = template.queryForType(Timestamp.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(instanceOf(Timestamp.class)));
   }
 
   @Test
   public void testQueryForDate() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( created TIMESTAMP );" +
-        "INSERT INTO foo(created) VALUES(current_timestamp)"));
+            "INSERT INTO foo(created) VALUES(current_timestamp)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-        ColumnExtractor.with(Date.class)), is(instanceOf(Date.class)));
+    Date result = template.queryForType(Date.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(instanceOf(Date.class)));
   }
 
   @Test
@@ -179,8 +218,12 @@ public class SQLTemplateTest {
         "CREATE TABLE foo ( created TIMESTAMP );" +
         "INSERT INTO foo(created) VALUES(current_timestamp)"));
 
-    assertThat(template.queryForObject("SELECT * FROM foo",
-        ColumnExtractor.with(Time.class)), is(instanceOf(Time.class)));
+    Time result = template.queryForType(Time.class)
+        .using("SELECT * FROM foo")
+        .extractingColumn()
+        .retrieveValue();
+
+    assertThat(result, is(instanceOf(Time.class)));
   }
 
   @Test
@@ -189,30 +232,31 @@ public class SQLTemplateTest {
         "CREATE TABLE foo ( text VARCHAR(255) );" +
         "INSERT INTO foo(text) VALUES('foo')"));
 
-    final RowMapper<String> rowMapper = new RowMapper<String>() {
-      @Override
-      public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return rs.getString(1);
-      }
-    };
+    String result = template.queryForType(String.class)
+        .using("SELECT * FROM foo")
+        .mappingRowsWith(new RowMapper<String>() {
+          @Override
+          public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return rs.getString(1);
+          }
+        })
+        .retrieveValue();
 
-    assertThat(template.queryForObject("SELECT * FROM foo", new Parameter[]{},
-        rowMapper), is(equalTo("foo")));
+    assertThat(result, is(equalTo("foo")));
   }
 
   @Test
   public void testQueryForObjectWithParameters() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( text1 VARCHAR(255), text2 VARCHAR(255) );" +
-        "INSERT INTO foo(text1, text2) VALUES('bar', 'baz')"));
+            "INSERT INTO foo(text1, text2) VALUES('bar', 'baz')"));
 
-    assertThat(template.queryForObject(
-        "SELECT text1, text2 FROM foo " +
-        "WHERE text1 = ? AND text2 = ?",
-            ColumnExtractor.with(2, String.class),
-            Parameter.with("bar"), Parameter.with("baz")
-        ),
-        is(equalTo("baz")));
+    String result = template.queryForType(String.class)
+        .using("SELECT text1, text2 FROM foo WHERE text1 = ? AND text2 = ?")
+        .extractingColumn(2)
+        .retrieveValue(Parameter.with("bar"), Parameter.with("baz"));
+
+    assertThat(result, is(equalTo("baz")));
   }
 
   @Test
@@ -309,26 +353,66 @@ public class SQLTemplateTest {
     final String[] words = { "bar", "baz", "bif"};
 
     template.execute("CREATE TABLE foo ( text VARCHAR(255) )");
-    try (StatementPreparer preparer = StatementPreparer.with(
-        "INSERT INTO foo(text) VALUES(?)")) {
+
+    try (SQLUpdate updater = template.update()
+            .using("INSERT INTO foo(text) VALUES(?)")
+            .repeatedly()) {
       for (String word : words) {
-        template.update(preparer, Parameter.with(word));
+        updater.execute(Parameter.with(word));
       }
     }
 
-    final List<String> results = template.query(
-        "SELECT * FROM foo ORDER BY text", ColumnExtractor.with(String.class));
+    final List<String> results = template.queryForType(String.class)
+        .using("SELECT * FROM foo ORDER BY text")
+        .extractingColumn()
+        .retrieveList();
 
     assertThat(results, is(equalTo(Arrays.asList(words))));
 
-    try (StatementPreparer preparer = StatementPreparer.with(
-        "SELECT text FROM foo WHERE text = ?")) {
+    try (SQLQuery<String> query = template.queryForType(String.class)
+            .using("SELECT text FROM foo WHERE text = ?")
+            .extractingColumn()
+            .repeatedly()) {
       for (String word : words) {
-        String result = template.queryForObject(preparer,
-            ColumnExtractor.with(String.class), Parameter.with(word));
+        String result = query.retrieveValue(Parameter.with(word));
         assertThat(result, is(equalTo(word)));
       }
     }
+
+  }
+
+  @Test
+  public void testQueryUsingResultSetHandler() throws Exception {
+    final String[] words = { "bar", "baz", "bif"};
+
+    template.execute("CREATE TABLE foo ( text VARCHAR(255) )");
+
+    try (SQLUpdate updater = template.update()
+        .using("INSERT INTO foo(text) VALUES(?)")
+        .repeatedly()) {
+      for (String word : words) {
+        updater.execute(Parameter.with(word));
+      }
+    }
+
+    final List<String> resultWords = new ArrayList<>();
+
+    final ResultSetHandler<Void> handler = new ResultSetHandler<Void>() {
+      @Override
+      public Void handleResult(ResultSet rs) throws SQLException {
+        while (rs.next()) {
+          resultWords.add(rs.getString("text"));
+        }
+        return null;
+      }
+    };
+
+    template.query()
+        .using("SELECT * FROM foo ORDER BY text")
+        .handlingResultWith(handler)
+        .retrieveValue();
+
+    assertThat(resultWords, is(equalTo(Arrays.asList(words))));
   }
 
 }

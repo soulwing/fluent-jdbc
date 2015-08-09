@@ -32,7 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link SingleRowExtractor}.
+ * Unit tests for {@link SingleRowHandler}.
  *
  * @author Carl Harris
  */
@@ -45,15 +45,15 @@ public class SingleRowExtractorTest {
   private ResultSet rs;
 
   @Mock
-  private ResultSetExtractor<Object> delegate;
+  private ResultSetHandler<Object> delegate;
 
-  private SingleRowExtractor<Object> extractor;
+  private SingleRowHandler<Object> extractor;
 
   private Object result = new Object();
 
   @Before
   public void setUp() throws Exception {
-    extractor = new SingleRowExtractor<>(delegate);
+    extractor = new SingleRowHandler<>(delegate);
   }
 
   @Test
@@ -62,12 +62,12 @@ public class SingleRowExtractorTest {
       {
         exactly(2).of(rs).next();
         will(onConsecutiveCalls(returnValue(true), returnValue(false)));
-        oneOf(delegate).extract(rs);
+        oneOf(delegate).handleResult(rs);
         will(returnValue(result));
       }
     });
 
-    assertThat(extractor.extract(rs), is(sameInstance(result)));
+    assertThat(extractor.handleResult(rs), is(sameInstance(result)));
   }
 
   @Test(expected = SQLNoResultException.class)
@@ -79,7 +79,7 @@ public class SingleRowExtractorTest {
       }
     });
 
-    extractor.extract(rs);
+    extractor.handleResult(rs);
   }
 
   @Test(expected = SQLNonUniqueResultException.class)
@@ -88,11 +88,11 @@ public class SingleRowExtractorTest {
       {
         exactly(2).of(rs).next();
         will(onConsecutiveCalls(returnValue(true), returnValue(true)));
-        oneOf(delegate).extract(rs);
+        oneOf(delegate).handleResult(rs);
       }
     });
 
-    extractor.extract(rs);
+    extractor.handleResult(rs);
   }
 
 }

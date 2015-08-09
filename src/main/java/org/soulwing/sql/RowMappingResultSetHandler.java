@@ -22,23 +22,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * A {@link ResultSetExtractor} that extracts a column from a row using a
- * {@link ColumnExtractor}.
+ * A {@link ResultSetHandler} that maps columns in a row to an object of
+ * of type {@code T} using a {@link RowMapper}.
  *
  * @author Carl Harris
  */
-class ColumnExtractingResultSetExtractor<T>
-    implements ResultSetExtractor<T> {
+class RowMappingResultSetHandler<T> implements ResultSetHandler<T> {
 
-  private final ColumnExtractor<T> extractor;
+  private final RowMapper<T> rowMapper;
+  private int rowNum;
 
-  public ColumnExtractingResultSetExtractor(ColumnExtractor<T> extractor) {
-    this.extractor = extractor;
+  public RowMappingResultSetHandler(RowMapper<T> rowMapper) {
+    this.rowMapper = rowMapper;
   }
 
   @Override
-  public T extract(ResultSet rs) throws SQLException {
-    return extractor.extract(rs);
+  public T handleResult(ResultSet rs) throws SQLException {
+    return rowMapper.mapRow(rs, ++rowNum);
   }
 
 }

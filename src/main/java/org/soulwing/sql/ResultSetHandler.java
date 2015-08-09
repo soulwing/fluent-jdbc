@@ -22,23 +22,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * A {@link ResultSetExtractor} that maps columns in a row to an object of
- * of type {@code T} using a {@link RowMapper}.
+ * A closure that handles the result set returned by a query.
+ * <p>
+ * This interface provides the means for an {@link SQLQuery} query to
+ * process the results of a query in an arbitrary fashion.
+ * <p>
+ * While the {@link #handleResult(ResultSet)} method can return a value, it is
+ * not always necessary.  When an implementation does not need to return a
+ * value, simply use {@link Void} as the type parameter.
  *
+ * @param <T> the type of result returned by the handler
  * @author Carl Harris
  */
-class RowMappingResultSetExtractor<T> implements ResultSetExtractor<T> {
+public interface ResultSetHandler<T> {
 
-  private final RowMapper<T> rowMapper;
-  private int rowNum;
-
-  public RowMappingResultSetExtractor(RowMapper<T> rowMapper) {
-    this.rowMapper = rowMapper;
-  }
-
-  @Override
-  public T extract(ResultSet rs) throws SQLException {
-    return rowMapper.mapRow(rs, ++rowNum);
-  }
+  /**
+   * Handles the result set returned by a query.
+   * @param rs the result set to process
+   * @return any value of type {@code T}
+   * @throws SQLException as needed
+   */
+  T handleResult(ResultSet rs) throws SQLException;
 
 }

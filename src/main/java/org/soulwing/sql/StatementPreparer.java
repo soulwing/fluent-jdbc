@@ -33,7 +33,7 @@ import org.soulwing.sql.source.SQLSource;
  *
  * @author Carl Harris
  */
-public class StatementPreparer implements PreparedStatementCreator {
+class StatementPreparer implements PreparedStatementCreator {
 
   private final Lock lock = new ReentrantLock();
 

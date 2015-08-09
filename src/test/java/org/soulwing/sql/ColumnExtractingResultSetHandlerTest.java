@@ -32,45 +32,41 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link RowMappingResultSetExtractor}.
+ * Unit tests for {@link RowMappingResultSetHandler}.
  *
  * @author Carl Harris
  */
-public class RowMappingResultSetExtractorTest {
+public class ColumnExtractingResultSetHandlerTest {
 
   @Rule
-  public final JUnitRuleMockery context = new JUnitRuleMockery();
+  public final JUnitRuleMockery context =
+      new JUnitRuleClassImposterizingMockery();
 
   @Mock
   private ResultSet rs;
 
   @Mock
-  private RowMapper<Object> rowMapper;
+  private ColumnExtractor<Object> delegate;
 
-  private Object result1 = new Object();
+  private Object result = new Object();
 
-  private Object result2 = new Object();
-
-  private RowMappingResultSetExtractor<Object> extractor;
+  private ColumnExtractingResultSetHandler<Object> extractor;
 
   @Before
   public void setUp() throws Exception {
-    extractor = new RowMappingResultSetExtractor<>(rowMapper);
+    extractor = new ColumnExtractingResultSetHandler<>(delegate);
   }
 
   @Test
   public void testExtract() throws Exception {
     context.checking(new Expectations() {
       {
-        oneOf(rowMapper).mapRow(rs, 1);
-        will(returnValue(result1));
-        oneOf(rowMapper).mapRow(rs, 2);
-        will(returnValue(result2));
+        oneOf(delegate).extract(rs);
+        will(returnValue(result));
       }
     });
 
-    assertThat(extractor.extract(rs), is(sameInstance(result1)));
-    assertThat(extractor.extract(rs), is(sameInstance(result2)));
+    assertThat(extractor.handleResult(rs), is(sameInstance(result)));
   }
 
 }

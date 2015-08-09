@@ -22,7 +22,6 @@ package org.soulwing.sql;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -106,200 +105,24 @@ public class SQLTemplate implements SQLOperations {
    * {@inheritDoc}
    */
   @Override
-  public <T> T query(PreparedStatementCreator psc, Parameter[] params,
-      ResultSetExtractor<T> extractor) {
-    final PreparedQueryExecutor executor =
-        new PreparedQueryExecutor(psc,
-            Arrays.asList(params));
-
-    ResultSet rs = null;
-    try {
-      rs = executor.execute(dataSource);
-      return extractResultSet(rs, extractor);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-    finally {
-      SQLUtils.closeQuietly(rs);
-    }
+  public SQLQuery<Void> query() {
+    return queryForType(Void.class);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public <T> T query(String sql, Parameter[] params,
-      ResultSetExtractor<T> extractor) {
-    PreparedStatementCreator psc = StatementPreparer.with(sql);
-    try {
-      return query(psc, params, extractor);
-    }
-    finally {
-      SQLUtils.closeQuietly(psc);
-    }
+  public <T> SQLQuery<T> queryForType(Class<T> type) {
+    return new QueryBuilder<>(type, dataSource);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public <T> T query(SQLSource source, Parameter[] parameters,
-      ResultSetExtractor<T> extractor) {
-    return query(SourceUtils.getSingleStatement(source), parameters, extractor);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> List<T> query(PreparedStatementCreator psc,
-      ColumnExtractor<T> extractor, Parameter... parameters) {
-    return query(psc, parameters, new MultipleRowExtractor<>(
-        new ColumnExtractingResultSetExtractor<>(extractor)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> List<T> query(String sql, ColumnExtractor<T> extractor,
-      Parameter... parameters) {
-    return query(sql, parameters, new MultipleRowExtractor<>(
-        new ColumnExtractingResultSetExtractor<>(extractor)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> List<T> query(SQLSource source, ColumnExtractor<T> extractor,
-      Parameter... parameters) {
-    return query(SourceUtils.getSingleStatement(source), extractor, parameters);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> List<T> query(PreparedStatementCreator psc, Parameter[] params,
-      RowMapper<T> rowMapper) {
-    return query(psc, params, new MultipleRowExtractor<>(
-        new RowMappingResultSetExtractor<>(rowMapper)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> List<T> query(String sql, Parameter[] params,
-      RowMapper<T> rowMapper) {
-    return query(sql, params, new MultipleRowExtractor<>(
-        new RowMappingResultSetExtractor<>(rowMapper)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> List<T> query(SQLSource source, Parameter[] params,
-      RowMapper<T> rowMapper) {
-    return query(SourceUtils.getSingleStatement(source), params, rowMapper);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> T queryForObject(PreparedStatementCreator psc,
-      ColumnExtractor<T> extractor, Parameter... params) {
-    return query(psc, params, new SingleRowExtractor<>(
-        new ColumnExtractingResultSetExtractor<>(extractor)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> T queryForObject(String sql, ColumnExtractor<T> extractor,
-      Parameter... parameters) {
-    return query(sql, parameters, new SingleRowExtractor<>(
-        new ColumnExtractingResultSetExtractor<>(extractor)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> T queryForObject(SQLSource source, ColumnExtractor<T> extractor,
-      Parameter... parameters) {
-    return queryForObject(SourceUtils.getSingleStatement(source), extractor,
-        parameters);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> T queryForObject(PreparedStatementCreator psc,
-      Parameter[] parameters, RowMapper<T> rowMapper) {
-    return query(psc, parameters, new SingleRowExtractor<>(
-        new RowMappingResultSetExtractor<>(rowMapper)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> T queryForObject(String sql, Parameter[] parameters,
-      final RowMapper<T> rowMapper) {
-    return query(sql, parameters, new SingleRowExtractor<>(
-        new RowMappingResultSetExtractor<>(rowMapper)));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <T> T queryForObject(SQLSource source, Parameter[] parameters,
-      RowMapper<T> rowMapper) {
-    return queryForObject(SourceUtils.getSingleStatement(source), parameters,
-        rowMapper);
-  }
-
-  @Override
-  public int update(PreparedStatementCreator psc, Parameter... params) {
-    final PreparedUpdateExecutor executor = new PreparedUpdateExecutor(
-        psc, Arrays.asList(params));
-
-    try {
-      return executor.execute(dataSource);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int update(String sql, Parameter... params) {
-    final PreparedStatementCreator psc = StatementPreparer.with(sql);
-    try {
-      return update(psc, params);
-    }
-    finally {
-      SQLUtils.closeQuietly(psc);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int update(SQLSource source, Parameter... params) {
-    return update(SourceUtils.getSingleStatement(source), params);
+  public SQLUpdate update() {
+    return new UpdateBuilder(dataSource);
   }
 
   /**
@@ -326,9 +149,9 @@ public class SQLTemplate implements SQLOperations {
     return call(SourceUtils.getSingleStatement(source), params);
   }
 
-  private <T> T extractResultSet(ResultSet rs, ResultSetExtractor<T> extractor) {
+  private <T> T extractResultSet(ResultSet rs, ResultSetHandler<T> extractor) {
     try {
-      return extractor.extract(rs);
+      return extractor.handleResult(rs);
     }
     catch (SQLException ex) {
       throw new SQLRuntimeException(ex);

@@ -48,10 +48,15 @@ class TestDatabase implements DataSourceProvider {
     dataSource.setProperties(new Properties());
   }
 
-  public void close() throws SQLException {
-    Connection connection = dataSource.getConnection();
-    connection.createStatement().execute("SHUTDOWN");
-    connection.close();
+  public void close() throws SQLRuntimeException {
+    try {
+      Connection connection = dataSource.getConnection();
+      connection.createStatement().execute("SHUTDOWN");
+      connection.close();
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
   }
 
   @Override

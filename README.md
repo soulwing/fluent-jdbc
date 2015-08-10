@@ -462,5 +462,103 @@ Each passed `SQLSource` is used to read a single statement, and is then closed.
 Calling Stored Procedures
 =========================
 
-[The API for this is going to change before 1.0.0 is released so wait until 
-it's stable before documenting it]
+Stored procedures can be called using `call` method.  This method creates call
+object that can be executed using the `execute` method.  Zero or more parameters
+for the call can be specified as arguments to the execute method.  Each parameter
+can be specified as IN, OUT, or INOUT.
+
+Unlike the query and update builder objects, *every* call object is configured
+to support repeated execution with different parameter lists.  This is 
+necessitated by the way the JDBC API exposes the results of each invocation of
+a stored procedure on the `CallableStatement` object.
+
+Because every call object supports repeated execution, you **must** close a call
+object when it is no longer needed, by either invoking the `close` method or by
+nesting the call object in a *try-with-resources* construct.
+
+The JDBC specification allows you the use of a vendor-independent syntax to
+call stored procedures, in addition to whatever call syntax is supported by your
+JDBC driver vendor.  See the Javadocs for [CallableStatement] (http://docs.oracle.com/javase/7/docs/api/java/sql/CallableStatement.html) 
+for details.  For the sake of simplicity, the examples shown below use the 
+vendor independent syntax, but you could also use whatever syntax is supported 
+by the JDBC vendor in your own code.
+
+### Passing IN and OUT parameters
+
+The following example calls a stored procedure named `add_person` that has
+three parameters.  The declaration in ANSI SQL might look something like this:
+
+```
+PROCEDURE add_person(IN name VARCHAR, IN age INTEGER, OUT id BIGINT) ...
+```
+
+We can call this procedure as follows:
+```
+try (SQLCall call = sqlTemplate.call("{ call add_person(?, ?, ?) }")) {
+  call.execute(
+    Parameter.in("Megan Marshall"), 
+    Parameter.in(29), 
+    Parameter.out(Types.BIGINT));
+  
+  long id = call.getOutParameter(3, long.class);
+  System.out.format("created person (id=%d)\n", id);
+}
+```
+
+As shown in the example, we can easily retrieve the values of OUT or INOUT
+parameters using the `getOutParameter` method.  In this example, we use the
+parameter position.  Some JDBC drivers allow the parameters to be retrieve 
+by name -- the `getOutParameter` method has an overload that takes a parameter
+name for this purpose.
+
+### Procedures that Implicitly Return Result Sets
+
+Some JDBC drivers implicitly return open cursors as `ResultSet` objects.
+In ANSI SQL, a procedure that returns a cursor as a result set might be
+specified like this:
+
+```
+CREATE PROCEDURE find_persons_by_name(IN p_name VARCHAR(50))
+  READS SQL DATA
+  DYNAMIC RESULT SETS 1
+BEGIN ATOMIC
+  DECLARE result CURSOR WITH RETURN FOR 
+    SELECT * FROM person WHERE name LIKE p_name FOR READ ONLY;
+  OPEN result;
+END
+```
+
+Invoking the `find_persons_by_name` procedure can be done using the `call` 
+method as follows:
+
+```
+try (SQLCall call = sqlTemplate.call("{ call find_persons_by_name(?) }")) {
+  boolean isResultSet = call.execute(Parameter.in("%Nadine%"));
+  if (isResultSet || call.getMoreResults()) {
+    List<String> names = call.retrieveList("name", String.class);
+    System.out.format("matching names: %s\n", names);
+  }
+  else {
+    System.out.format("no names match");
+  }
+}
+```
+
+The *if* statement inside of the *try* block warrants some explanation. Some 
+JDBC drivers will automatically return the first result set and indicate that 
+they have done so by returning `true` from the `execute` method.  Others will 
+return `false` from `execute`, but a subsequent call to `getMoreResults`
+will return `true` indicating that a result set is available.  The example code
+should work correctly in either case.
+
+Once we know that a result set is available, we have the same choices for
+handling it that we have when invoking a query:
+
+* map the result set to objects using a `RowMapper`
+* extract a column value from each row (as shown here)
+* handle the result set yourself using a `ResultSetHandler`
+
+See the [Javadocs] (http://soulwing.github.io/sql-template/maven-site/apidocs/org/soulwing/sql/SQLCall.html)
+for more details on handling return values from stored procedures.
+
+

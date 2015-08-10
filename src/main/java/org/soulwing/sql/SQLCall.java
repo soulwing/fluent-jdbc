@@ -21,8 +21,6 @@ package org.soulwing.sql;
 import java.sql.ResultSet;
 import java.util.List;
 
-import org.soulwing.sql.source.SQLSource;
-
 /**
  * A SQL call operation.
  * <p>
@@ -36,13 +34,14 @@ import org.soulwing.sql.source.SQLSource;
  * <ul>
  * <li> zero or more implicitly returned {@link ResultSet} objects,
  * <li> an optional update count, and
- * <li> zero or more parameters registered for OUT or INOUT semantics.
+ * <li> zero or more parameters configured for OUT or INOUT semantics.
  * </ul>
+ * <p>
  * While this API supports all of the possible return value mechanisms that
  * are inherent with JDBC, the actual support provided for stored procedures
  * varies greatly between JDBC vendors, with each vendor choosing which
- * mechanism to support.  It is important to understand the capabilities of
- * the specific JDBC vendor in order to effectively make use of this API.
+ * mechanisms to support.  It is important to understand the capabilities of
+ * the specific JDBC vendor in order to effectively use this API.
  * <p>
  * For maximum portability, on return from {@link #execute} the caller should
  * first process all results sets and update counts, before retrieving the

@@ -237,8 +237,8 @@ VALUES(3, 'Megan Marshall', 27);
 Performing Queries and Updates
 ==============================
 
-`SQLTemplate` provides builder-pattern-based API for executing queries and
-updates.
+`SQLTemplate` provides an API that is based on the *builder* and *command* 
+patterns for executing queries and updates.
 
 ### Retrieving Rows
 
@@ -425,9 +425,10 @@ try (CSVReader reader = new CSVReader(csvFile);
 
 When a query or updater is configured for repeated execution, you must close
 it when it is no longer needed, so that the database connection and other JDBC 
-objects it holds can be released.  As shown here, a convenient way to make it
-gets closed is to use the Java 7 *try-with-resources* construct.  Of course, you 
-could also accomplish the same thing using a *try-finally* construct. 
+objects it holds can be released.  As shown here, a convenient way to make 
+certain it gets closed is to use the Java 7 *try-with-resources* construct.  Of 
+course, you could also accomplish the same thing using a *try-finally* construct,
+in which you explicitly call the `close` method.
 
  
 ### Using files for SQL for Queries and Updates
@@ -504,16 +505,15 @@ try (SQLCall call = sqlTemplate.call("{ call add_person(?, ?, ?) }")) {
 ```
 
 As shown in the example, we can easily retrieve the values of OUT or INOUT
-parameters using the `getOutParameter` method.  In this example, we use the
-parameter position.  Some JDBC drivers allow the parameters to be retrieve 
-by name -- the `getOutParameter` method has an overload that takes a parameter
-name for this purpose.
+parameters using the `getOutParameter` method.  In this example, we specify
+the parameter by position. Some JDBC drivers allow the parameters to be 
+retrieved by name -- the `getOutParameter` method has an overload that takes
+a parameter name as a string for this purpose.
 
 ### Procedures that Implicitly Return Result Sets
 
-Some JDBC drivers implicitly return open cursors as `ResultSet` objects.
-In ANSI SQL, a procedure that returns a cursor as a result set might be
-specified like this:
+Some JDBC drivers return open cursors as `ResultSet` objects. In ANSI SQL, a 
+procedure that returns a cursor as a result set might be written like this:
 
 ```
 CREATE PROCEDURE find_persons_by_name(IN p_name VARCHAR(50))

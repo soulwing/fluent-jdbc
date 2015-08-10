@@ -220,7 +220,7 @@ public interface SQLQuery<T> extends AutoCloseable {
   SQLQuery<T> repeatedly();
 
   /**
-   * Retrieves the list of values for all rows matched by this query.
+   * Executes the query, retrieving the list of values for all matching rows.
    * @param parameters values for query placeholders
    * @return list of values of type {@code T} that were extracted/mapped by
    *   this query
@@ -228,7 +228,7 @@ public interface SQLQuery<T> extends AutoCloseable {
   List<T> retrieveList(Parameter... parameters);
 
   /**
-   * Retrieves the value for the single row matched by this query.
+   * Executes the query, retrieving a value representing the matching row
    * @param parameters values for query placeholders
    * @return value of type {@code T} that was extracted/mapped by this query
    * @throws SQLNoResultException if no row was matched by this query

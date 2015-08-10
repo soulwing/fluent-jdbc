@@ -129,36 +129,16 @@ public class SQLTemplate implements SQLOperations {
    * {@inheritDoc}
    */
   @Override
-  public CallResult call(String sql, Parameter... params) {
-    final CallableStatementExecutor executor = new CallableStatementExecutor(
-        sql, Arrays.asList(params));
-    try {
-      executor.execute(dataSource);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-    return executor;
+  public SQLCall call(String sql) {
+    return new CallBuilder(dataSource, CallPreparer.with(sql));
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public CallResult call(SQLSource source, Parameter... params) {
-    return call(SourceUtils.getSingleStatement(source), params);
-  }
-
-  private <T> T extractResultSet(ResultSet rs, ResultSetHandler<T> extractor) {
-    try {
-      return extractor.handleResult(rs);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-    finally {
-      SQLUtils.closeQuietly(rs);
-    }
+  public SQLCall call(SQLSource source) {
+    return new CallBuilder(dataSource, CallPreparer.with(source));
   }
 
 }

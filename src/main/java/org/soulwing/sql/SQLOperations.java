@@ -53,7 +53,7 @@ public interface SQLOperations {
   void executeScript(SQLSource source);
 
   /**
-   * Creates a query that returns nothing.
+   * Creates a query operation.
    * <p>
    * This is a synonym for {@link #queryForType(Class)} with {@link Void}
    * as the specified type.  A query obtained via this method is typically
@@ -65,7 +65,7 @@ public interface SQLOperations {
   SQLQuery<Void> query();
 
   /**
-   * Creates a query for objects of a given type.
+   * Creates a query operation for objects of a given type.
    * @param type subject type of the query
    * @return a query that can be configured and executed to retreive rows
    *    from the database and return objects of type {@code T}.
@@ -73,28 +73,24 @@ public interface SQLOperations {
   <T> SQLQuery<T> queryForType(Class<T> type);
 
   /**
-   * Creates an updater.
+   * Creates an update operation.
    * @return an updater that can be configured and executed to update rows in
    *    the database.
    */
   SQLUpdate update();
 
   /**
-   * Executes a call to a stored procedure.
-   * @param sql SQL for the call
-   * @param params substitution parameters that specify the arguments for the 
-   *    call
-   * @return the output parameters specified for the call; the returned
+   * Creates a call operation.
+   * @param sql SQL call statement
+   * @return call operation
    */
-  CallResult call(String sql, Parameter... params);
+  SQLCall call(String sql);
 
   /**
-   * Executes a call to a stored procedure.
-   * @param source source for the SQL to call
-   * @param params substitution parameters that specify the arguments for the
-   *    call
-   * @return the output parameters specified for the call
+   * Creates a call operation.
+   * @param source source for the SQL call statement
+   * @return call operation;
    */
-  CallResult call(SQLSource source, Parameter... params);
+  SQLCall call(SQLSource source);
 
 }

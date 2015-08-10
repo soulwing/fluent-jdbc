@@ -20,138 +20,31 @@
 package org.soulwing.sql;
 
 import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 /**
- * An executor that executes {@link CallableStatement} objects.
+ * An {@link SQLExecutor} that executes a stored procedure call.
  *
  * @author Carl Harris
  */
-class CallableStatementExecutor implements SQLExecutor<Boolean>, CallResult {
-
-  private final String sql;
-  private final List<Parameter> parameters;
-  private Connection connection;
-  private CallableStatement call;
+class CallableStatementExecutor
+    extends AbstractPreparedStatementExecutor<Boolean, CallableStatement> {
 
   /**
    * Constructs a new instance.
-   * @param sql SQL statement to execute
-   * @param parameters parameters for the statement
+   * @param psc prepared statement creator for the call statement
+   * @param parameters values for placeholders in the statement
    */
-  public CallableStatementExecutor(String sql, List<Parameter> parameters) {
-    this.sql = sql;
-    this.parameters = parameters;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public Boolean execute(DataSource dataSource) throws SQLException {
-    this.connection = dataSource.getConnection();
-    this.call = connection.prepareCall(sql);
-    int index = 1;
-    for (Parameter parameter : parameters) {
-      parameter.inject(index++, call);
-    }
-
-    return call.execute();
+  public CallableStatementExecutor(
+      PreparedStatementCreator<CallableStatement> psc,
+      List<Parameter> parameters) {
+    super(psc, parameters);
   }
 
   @Override
-  public int getUpdateCount() {
-    try {
-      return call.getUpdateCount();
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-  }
-
-  @Override
-  public boolean getMoreResults() {
-    try {
-      return call.getMoreResults();
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-  }
-
-  @Override
-  public ResultSet getResultSet() {
-    try {
-      return call.getResultSet();
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-  }
-
-  @Override
-  public <T> T extractResultSet(ResultSetHandler<T> extractor) {
-    ResultSet rs = null;
-    try {
-      rs = call.getResultSet();
-      return extractor.handleResult(rs);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-    finally {
-      SQLUtils.closeQuietly(rs);
-    }
-  }
-
-  @Override
-  public <T> List<T> mapResultSet(RowMapper<T> rowMapper) {
-    return extractResultSet(new MultipleRowHandler<>(
-        new RowMappingResultSetHandler<>(rowMapper)));
-  }
-
-  @Override
-  public <T> T get(ColumnExtractor<T> columnExtractor) {
-    return extractResultSet(new SingleRowHandler<>(
-        new ColumnExtractingResultSetHandler<>(columnExtractor)));
-  }
-
-  @Override
-  public <T> T get(RowMapper<T> rowMapper) {
-    return extractResultSet(new SingleRowHandler<>(
-        new RowMappingResultSetHandler<>(rowMapper)));
-  }
-
-  @Override
-  public List<Parameter> getOutParameters()  {
-    try {
-      List<Parameter> returnValues = new ArrayList<>();
-      int index = 1;
-      for (Parameter parameter : parameters) {
-        if (parameter.isOut()) {
-          returnValues.add(Parameter.with(parameter.getType(),
-              call.getObject(index)));
-        }
-        index++;
-      }
-      return returnValues;
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-  }
-
-  @Override
-  public void close() {
-    if (call == null) return;
-    SQLUtils.closeQuietly(call);
-    SQLUtils.closeQuietly(connection);
+  protected Boolean doExecute(CallableStatement statement) throws SQLException {
+    return statement.execute();
   }
 
 }

@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soulwing.sql.source.StringSQLSource;
@@ -267,20 +266,25 @@ public class SQLTemplateTest {
           "SET t = text; " +
           "END");
 
-    CallResult result = template.call("{call foo(?, ?)}",
-       Parameter.in("bar"),  Parameter.out(Types.VARCHAR));
+    SQLCall call = template.call("{call foo(?, ?)}");
     try {
-      List<Parameter> results = result.getOutParameters();
+      call.execute(Parameter.in("bar"), Parameter.out(Types.VARCHAR));
+      List<Parameter> results = call.getOutParameters();
       assertThat(results.size(), is(equalTo(1)));
       assertThat((String) results.get(0).getValue(), is(equalTo("bar")));
+
+      call.execute(Parameter.in("baz"), Parameter.out(Types.VARCHAR));
+      results = call.getOutParameters();
+      assertThat(results.size(), is(equalTo(1)));
+      assertThat((String) results.get(0).getValue(), is(equalTo("baz")));
     }
     finally {
-      result.close();
+      call.close();
     }
   }
 
   @Test
-  public void testCallProcedureAndMapResultSet() throws Exception {
+  public void testCallProcedureAndRetrieveList() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( text VARCHAR(255) ); " +
             "INSERT INTO foo(text) VALUES('bar'); "));
@@ -302,23 +306,24 @@ public class SQLTemplateTest {
       }
     };
 
-    CallResult result = template.call("call foo_proc()");
+    SQLCall call = template.call("call foo_proc()");
     try {
-      assertThat(result.getMoreResults(), is(true));
-      List<String> results = result.mapResultSet(rowMapper);
+      call.execute();
+      assertThat(call.getMoreResults(), is(true));
+      List<String> results = call.retrieveList(rowMapper);
       assertThat(results.size(), is(equalTo(1)));
       assertThat(results.get(0), is(equalTo("bar")));
-      assertThat(result.getMoreResults(), is(false));
-      assertThat(result.getUpdateCount(), is(equalTo(-1)));
+      assertThat(call.getMoreResults(), is(false));
+      assertThat(call.getUpdateCount(), is(equalTo(-1)));
     }
     finally {
-      result.close();
+      call.close();
     }
 
   }
 
   @Test
-  public void testCallProcedureAndGetObject() throws Exception {
+  public void testCallProcedureAndRetrieveValue() throws Exception {
     template.executeScript(new StringSQLSource(
         "CREATE TABLE foo ( text VARCHAR(255) ); " +
             "INSERT INTO foo(text) VALUES('bar'); "));
@@ -333,16 +338,17 @@ public class SQLTemplateTest {
             "OPEN result; " +
             "END");
 
-    CallResult result = template.call("call foo_proc()");
+    SQLCall call = template.call("call foo_proc()");
     try {
-      assertThat(result.getMoreResults(), is(true));
-      String value = result.get(ColumnExtractor.with(String.class));
+      call.execute();
+      assertThat(call.getMoreResults(), is(true));
+      String value = call.retrieveValue(1, String.class);
       assertThat(value, is(equalTo("bar")));
-      assertThat(result.getMoreResults(), is(false));
-      assertThat(result.getUpdateCount(), is(equalTo(-1)));
+      assertThat(call.getMoreResults(), is(false));
+      assertThat(call.getUpdateCount(), is(equalTo(-1)));
     }
     finally {
-      result.close();
+      call.close();
     }
 
   }

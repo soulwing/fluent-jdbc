@@ -30,7 +30,7 @@ List<Person> results = sqlTemplate.queryForType(Person.class)
     .retrieveList(Parameter.with("%Nadine%");
 ```
 This library is lightweight and depends only on the JDBC features of the 
-JDK -- i.e. is addes only a single (small) JAR file dependency to your 
+JDK -- i.e. it adds only a single (small) JAR file dependency to your 
 application.
 
 Getting Started

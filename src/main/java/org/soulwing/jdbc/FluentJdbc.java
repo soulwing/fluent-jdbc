@@ -33,7 +33,7 @@ import org.soulwing.jdbc.source.SQLSource;
  * as necessary to obtain connections to the database.
  * <pre>
  * import javax.sql.DataSource;
- * import org.soulwing.sql.FluentJdbc;
+ * import org.soulwing.jdbc.FluentJdbc;
  *
  * DataSource dataSource = ...  // typically injected or retrieved via JNDI
  * FluentJdbc sqlTemplate = new FluentJdbc(dataSource);

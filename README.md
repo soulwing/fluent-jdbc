@@ -1,30 +1,31 @@
-sql-template
-============
+Fluent JDBC
+===========
 
-[![Build Status](https://travis-ci.org/soulwing/sql-template.svg?branch=master)](https://travis-ci.org/soulwing/sql-template)
+[![Build Status](https://travis-ci.org/soulwing/fluent-jdbc.svg?branch=master)](https://travis-ci.org/soulwing/fluent-jdbc)
 
-A template for performing SQL using JDBC, inspired by Spring's `JdbcTemplate`.
+Fluent JDBC is a lightweight façade for performing SQL using JDBC, inspired by
+Spring's `JdbcTemplate`.
 
 Spring's `JdbcTemplate` is great... if you're using the Spring framework. 
 However, if you're building apps based on Java EE 7, using `JdbcTemplate`
 brings in an awful lot of Spring machinery that you don't really need.
 
-This project focuses on the subset of SQL template features needed to perform
-tasks like database migration (e.g. using [Flyway] (http://flywaydb.org)) and 
-data loading. The assumption here is that you're going to be using JPA for most 
-of your interaction with the database, but you need to do a little plain old SQL 
-here and there and want that to be as simple to do as possible.
+This project focuses on the subset of JDBC features needed to perform tasks like 
+database migration (e.g. using [Flyway] (http://flywaydb.org)) and data loading. 
+The assumption here is that you're going to be using JPA for most of your 
+interaction with the database, but you need to do a little plain old SQL here 
+and there and want that to be as simple to do as possible.
 
 One of the less attractive aspects of Spring's `JdbcTemplate` is that it has
 *many* overloaded methods with different argument types, which makes it hard
-to understand and use.  This SQL template library has an operations API that
-uses the builder and command object patterns to create a fluent languauge 
-for specifying queries, updates, and stored procedure calls. Instead of trying 
-to figure out which of the many overloads of the `query` method might be needed 
-in a particular situation you can instead write code like this:
+to understand and use.  Fluent JDBC has an operations API that uses the Builder 
+and Command design patterns to create a fluent language for specifying queries, 
+updates, and stored procedure calls. Instead of trying to figure out which of 
+the many overloads of the `query` method might be needed in a particular 
+situation you can instead write code like this:
 
 ```
-List<Person> results = sqlTemplate.queryForType(Person.class)
+List<Person> results = jdbc.queryForType(Person.class)
     .using("SELECT * FROM person where name like ?")
     .mappingRowsWith(new PersonMapper())
     .retrieveList(Parameter.with("%Nadine%"));
@@ -36,41 +37,41 @@ application.
 Getting Started
 ===============
 
-The `SQLTemplate` class provides the central API you use to perform SQL 
-operations.  See the [Javadocs] (http://soulwing.github.io/sql-template/maven-site/apidocs/)
+The `FluentJdbc` class provides the central API you use to perform SQL 
+operations.  See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/)
 for full details of the API.  
 
 It is a plain old Java object, with a constructor that takes
-a JDBC `DataSource`.  An instance of `SQLTemplate` is thread safe and thus
+a JDBC `DataSource`.  An instance of `FluentJdbc` is thread safe and thus
 can be used by any number of application components concurrently.
 
 ```
 import javax.sql.DataSource;
-import org.soulwing.sql.SQLTemplate;
+import org.soulwing.jdbc.FluentJdbc;
 
 DataSource dataSource = ... // typically injected by the container
-SQLTemplate sqlTemplate = new SQLTemplate(dataSource);
+FluentJdbc jdbc = new FluentJdbc(dataSource);
 ```
 
-Using `SQLTemplate` you can easily execute any combination of queries and updates
+Using Fluent JDBC you can easily execute any combination of queries and updates
 as well as SQL DDL statements.  The following simple example creates a table, 
 inserts some values into it, and then queries and prints some results.  
 
-##### `src/test/java/SQLTemplateDemo.java`: 
+##### `src/test/java/FluentJdbcDemo.java`: 
 ```
 1   DataSource dataSource = ... // typically injected by the container
-2   SQLTemplate sqlTemplate = new SQLTemplate(dataSource);
+2   FluentJdbc jdbc = new FluentJdbc(dataSource);
 
-3   sqlTemplate.execute("CREATE TABLE person ( " + 
+3   jdbc.execute("CREATE TABLE person ( " + 
        "id BIGINT PRIMARY KEY, name VARCHAR(50), age INTEGER )");
 
-4   sqlTemplate.executeScript(new StringSQLSource(
+4   jdbc.executeScript(new StringSQLSource(
        "INSERT INTO PERSON(id, name, age) VALUES(1, 'Jennifer Wilson', 29);" +
        "INSERT INTO PERSON(id, name, age) VALUES(2, 'Nadine Bennett', 31);" +
        "INSERT INTO PERSON(id, name, age) VALUES(3, 'Megan Marshall', 27);"
     ));
 
-5   List<Map> people = sqlTemplate.queryForType(Map.class)
+5   List<Map> people = jdbc.queryForType(Map.class)
         .using("SELECT * FROM person")
         .mappingRowsWith(new RowMapper<Map>() {
             public Map mapRow(ResultSet rs, int rowNum)
@@ -86,30 +87,30 @@ inserts some values into it, and then queries and prints some results.
 
 6   System.out.format("people: %s\n", people);
 
-7   try (SQLUpdate updater = sqlTemplate.update()
+7   try (SQLUpdate updater = jdbc.update()
             .using("UPDATE person SET age = age + 1 WHERE id = ?")
             .repeatedly()) {
 8     updater.execute(Parameter.with(2));
 9     updater.execute(Parameter.with(3));
     }
 
-10  int averageAge = sqlTemplate.queryForType(int.class)
+10  int averageAge = jdbc.queryForType(int.class)
         .using("SELECT AVG(age) FROM person")
         .extractingColumn()
         .retrieveValue();
 
 11  System.out.format("average age: %d\n", averageAge);
 
-12  int count = sqlTemplate.update()
+12  int count = jdbc.update()
         .using("DELETE FROM person")
         .execute();
 
 13  System.out.format("deleted %d people\n", count);
 ```
 
-The example demonstrates many of the salient features of `SQLTemplate`.
+The example demonstrates many of the salient features of Fluent JDBC.
 
-* Line 2 -- `SQLTemplate` is a POJO that you construct with a `DataSource`
+* Line 2 -- `FluentJdbc` is a POJO that you construct with a `DataSource`
 * Line 3 -- Execute arbitrary SQL DDL or DML statements using `execute`
 * Line 4 -- Execute DDL or DML scripts using an `SQLSource` with 
   `executeScript`; here we use `StringSQLSource`, but there are useful 
@@ -130,9 +131,9 @@ The example demonstrates many of the salient features of `SQLTemplate`.
   will be extracted, we but we can also specify a column by label or index
 * Line 12 -- Executing an update returns the number of affected rows
   
-In addition to the features shown in the demo, `SQLTemplate` provides support
+In addition to the features shown in the demo, Fluent JDBC provides support
 for calling stored procedures and handling returned values and result sets --
-see [Calling Stored Procedures] for details.
+see [Calling Stored Procedures] (#calling-stored-procedures) for details.
 
 
 ### JDBC Exception Handling
@@ -140,14 +141,14 @@ see [Calling Stored Procedures] for details.
 The JDBC API is designed such that almost every method throws the checked 
 `SQLException` type.  As observed by others, this isn't very useful, since
 in many circumstances it isn't feasible to recover from an `SQLException`. 
-All components of `SQLTemplate` are designed to wrap `SQLException` in an 
+All components of Fluent JDBC are designed to wrap `SQLException` in an 
 unchecked `SQLRuntimeException`.  
 
 Interface methods that your code implements are designed to throw `SQLException`
 so that you don't have to worry about catching it and rethrowing it.  For 
 example, in our demo `RowMapper` we invoked several methods of the 
 `java.sql.ResultSet` interface each of which throws `SQLException`.  When 
-`SQLTemplate` invokes our row mapper, it will take care of catching and
+Fluent JDBC invokes our row mapper, it will take care of catching and
 rethrowing any `SQLException` that occurs.
 
 No effort is made to translate SQL exceptions into more meaningful exception
@@ -161,14 +162,14 @@ Executing SQL DDL and DML Statements
 
 The most common plain old SQL tasks are those that involve executing DDL
 statements (such as `CREATE TABLE`) or DML statements (such as `INSERT INTO`).
-Using `SQLTemplate`, you can not only invoke single SQL statements, but also
+Using Fluent JDBC, you can not only invoke single SQL statements, but also
 SQL scripts.
 
 ### Executing a single SQL statement
 
 You can easily execute a statement in a string literal.
 ```
-sqlTemplate.execute("CREATE TABLE person ( name VARCHAR(50) )");
+jdbc.execute("CREATE TABLE person ( name VARCHAR(50) )");
 ```
 
 You could also put a single statement into a file and execute it.  The `execute`
@@ -176,13 +177,13 @@ method accepts any `SQLSource` as input.  For example, using `ResourceSQLSource`
 we could execute a statement in a classpath resource:
 
 ```
-sqlTemplate.execute(ResourceSQLSource.with("classpath:createTable.sql");
+jdbc.execute(ResourceSQLSource.with("classpath:createTable.sql");
 ```
 
 Or in any file:
 
 ```
-sqlTemplate.execute(ResourceSQLSource.with("file:/path/to/some/file.sql");
+jdbc.execute(ResourceSQLSource.with("file:/path/to/some/file.sql");
 ```
 
 When using the `execute` method with a `SQLSource`, only the first statement 
@@ -198,16 +199,16 @@ argument, that provides the SQL script to execute. Using `ResourceSQLSource`
 we could execute a classpath resource as a script:
 
 ```
-sqlTemplate.executeScript(ResourceSQLSource.with("classpath:db/createSchema.sql"));
+jdbc.executeScript(ResourceSQLSource.with("classpath:db/createSchema.sql"));
 ```
 
 Or any other file:
 
 ```
-sqlTemplate.executeScript(ResourceSQLSource.with("file:/path/to/createSchema.sql"));
+jdbc.executeScript(ResourceSQLSource.with("file:/path/to/createSchema.sql"));
 ```
 
-`SQLTemplate` can read SQL scripts for most database dialects.  Simply terminate
+Fluent JDBC can read SQL scripts for most database dialects.  Simply terminate
 each statement with a semicolon (;).  A script can contain single-line or block
 comments, too.  For example:
 
@@ -228,7 +229,7 @@ VALUES(3, 'Megan Marshall', 27);
 ```
 
 > **NOTE**:
-> At this time, the lexer used by `SQLTemplate` does not support statements
+> At this time, the parser used in Fluent JDBC does not support statements
 > with block constructs containing multiple valid SQL statements, such as those 
 > used in defining stored procedures.  This will be addressed in a future 
 > version.  
@@ -237,12 +238,12 @@ VALUES(3, 'Megan Marshall', 27);
 Performing Queries and Updates
 ==============================
 
-`SQLTemplate` provides an API that is based on the *builder* and *command* 
+Fluent JDBC provides an API that is based on the *builder* and *command* 
 patterns for executing queries and updates.
 
 ### Retrieving Rows
 
-When invoking a query that returns multiple rows, `SQLTemplate` allows you to
+When invoking a query that returns multiple rows, Fluent JDBC allows you to
 easily map column values to create a list of Java objects that correspond to 
 each row of data returned by the query.  The `RowMapper` interface allows you
 to define how row contents should be used to create instances of almost any
@@ -250,7 +251,7 @@ object type:
 
 ```
 int minAge = 21;
-List<Person> person = sqlTemplate.queryForType(Person.class)
+List<Person> person = jdbc.queryForType(Person.class)
     .using("SELECT * FROM person WHERE age >= ? ORDER BY age")
     .mappingRowsWith(new RowMapper<Person>() { 
                          public void mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -276,7 +277,7 @@ You can also extract all values of a given column:
 
 ```
 int minAge = 21;
-List<Integer> person = sqlTemplate.queryForType(Integer.class)
+List<Integer> person = jdbc.queryForType(Integer.class)
     .using("SELECT * FROM person WHERE age >= ?")
     .extractingColumn("age")
     .retrieveList(Parameter.with(minAge)); 
@@ -296,7 +297,7 @@ You can use a `RowMapper` to turn the resulting row of a single row query
 into an object:
 
 ```
-Person person = sqlTemplate.queryForType(Person.class)
+Person person = jdbc.queryForType(Person.class)
     .using("SELECT * FROM person WHERE id = ?")
     .mappingRowsWith(new RowMapper<Person>() { 
         public void mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -313,7 +314,7 @@ Often, you want to query and get a single column value.  The query builder's
 `extractColumn` method can be used to accomplish this easily:
 
 ```
-int average = sqlTemplate.queryForType(int.class)
+int average = jdbc.queryForType(int.class)
     .using"SELECT AVG(age) FROM person")
     .extractingColumn()
     .retrieveValue();
@@ -323,7 +324,7 @@ When the query returns multiple columns, you can identify the column value of
 interest by name/label:
 
 ```
-int min = sqlTemplate.queryForType(int.class)
+int min = jdbc.queryForType(int.class)
     .using("SELECT MAX(age) max_age, MIN(age) min_age FROM person")
     .extractingColumn("min_age")
     .retrieveValue();
@@ -332,7 +333,7 @@ int min = sqlTemplate.queryForType(int.class)
 Or by column position (column indexes start at 1):
 
 ```
-int min = sqlTemplate.queryForType(int.class)
+int min = jdbc.queryForType(int.class)
     .using("SELECT MAX(age) max_age, MIN(age) min_age FROM person")
     .extractingColumn(2)
     .retrieveValue();
@@ -351,7 +352,7 @@ you can use the `ResultSetHandler` interface.  Suppose we wanted to export
 some data:
 
 ```
-sqlTemplate.query().
+jdbc.query().
   .using("SELECT * FROM person")
   .handlingResultWith(new ResultSetExtractor()<Void> {
       public Void extract(ResultSet rs) throws SQLException {
@@ -376,7 +377,7 @@ the SQL statement that you want to execute.
 For example:
 
 ```
-sqlTemplate.update()
+jdbc.update()
     .using("UPDATE person SET age = age + 1 WHERE id = ?")
     .execute(Parameter.with(2));
 ```    
@@ -386,7 +387,7 @@ The `update` method returns the number of rows affected by the given statement.
 
 ### Executing Queries and Updates Repeatedly
 
-Normally, `SQLTemplate` closes the underlying JDBC statement and database 
+Normally, Fluent JDBC closes the underlying JDBC statement and database 
 connection after the statement has been executed (using `execute`, 
 `retrieveList`, or `retrieveValue`) and the result has been retrieved. 
 
@@ -410,7 +411,7 @@ final File csvFile = new File("people.csv");
 final String sql = "";
 
 try (CSVReader reader = new CSVReader(csvFile);
-    SQLUpdate updater = sqlTemplate.update().
+    SQLUpdate updater = jdbc.update().
         .using("INSERT INTO person(id, name, age) VALUES(?, ?, ?)")
         .repeatedly()) {  
   while (reader.hasNext()) {
@@ -443,14 +444,14 @@ Using `SQLSource` with the query and update methods is easy:
 
 ```
 long id = 2;
-int age = sqlTemplate.queryForType(int.class)
+int age = jdbc.queryForType(int.class)
     .using(ResourceSQLSource.with("classpath:sql/queries/findPersonById.sql"))
     .extractingColumn("age")
     .retrieveValue(Parameter.with(id));
 
 age = age + 1;
 
-sqlTemplate.update()
+jdbc.update()
     .using(ResourceSQLSource.with("classpath:sql/updates/updatePersonAgeById.sql"))
     .execute(Parameter.with(age), Parameter.with(id));
 ```
@@ -493,7 +494,7 @@ PROCEDURE add_person(IN name VARCHAR, IN age INTEGER, OUT id BIGINT) ...
 
 We can call this procedure as follows:
 ```
-try (SQLCall call = sqlTemplate.call("{ call add_person(?, ?, ?) }")) {
+try (SQLCall call = jdbc.call("{ call add_person(?, ?, ?) }")) {
   call.execute(
     Parameter.in("Megan Marshall"), 
     Parameter.in(29), 
@@ -530,7 +531,7 @@ Invoking the `find_persons_by_name` procedure can be done using the `call`
 method as follows:
 
 ```
-try (SQLCall call = sqlTemplate.call("{ call find_persons_by_name(?) }")) {
+try (SQLCall call = jdbc.call("{ call find_persons_by_name(?) }")) {
   boolean isResultSet = call.execute(Parameter.in("%Nadine%"));
   if (isResultSet || call.getMoreResults()) {
     List<String> names = call.retrieveList("name", String.class);
@@ -556,7 +557,7 @@ handling it that we have when invoking a query:
 * extract a column value from each row (as shown here)
 * handle the result set yourself using a `ResultSetHandler`
 
-See the [Javadocs] (http://soulwing.github.io/sql-template/maven-site/apidocs/org/soulwing/sql/SQLCall.html)
+See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/sql/SQLCall.html)
 for more details on handling return values from stored procedures.
 
 

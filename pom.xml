@@ -14,6 +14,9 @@
     and Command design patterns.
   </description>
   <inceptionYear>2014</inceptionYear>
+  <organization>
+    <name>Carl Harris, Jr</name>
+  </organization>
   <url>https://github.com/soulwing/fluent-jdbc</url>
   <licenses>
     <license>

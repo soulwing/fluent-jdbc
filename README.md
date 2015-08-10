@@ -16,7 +16,7 @@ of your interaction with the database, but you need to do a little plain old SQL
 here and there and want that to be as simple to do as possible.
 
 One of the less attractive aspects of Spring's `JdbcTemplate` is that it has
-*many* overloaded methods with different argument types, which makes it harder
+*many* overloaded methods with different argument types, which makes it hard
 to understand and use.  This SQL template library has an operations API that
 uses the builder and command object patterns to create a fluent languauge 
 for specifying queries, updates, and stored procedure calls. Instead of trying 

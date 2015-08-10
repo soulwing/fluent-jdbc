@@ -18,10 +18,10 @@ here and there and want that to be as simple to do as possible.
 One of the less attractive aspects of Spring's `JdbcTemplate` is that it has
 *many* overloaded methods with different argument types, which makes it harder
 to understand and use.  This SQL template library has an operations API that
-uses the builder pattern to create a fluent languauge for specifying queries and 
-updates. Instead of trying to figure out which of the many overloads for a 
-`query` might be needed in a particular situation you can instead write code 
-like this:
+uses the builder and command object patterns to create a fluent languauge 
+for specifying queries, updates, and stored procedure calls. Instead of trying 
+to figure out which of the many overloads of the `query` method might be needed 
+in a particular situation you can instead write code like this:
 
 ```
 List<Person> results = sqlTemplate.queryForType(Person.class)
@@ -29,11 +29,9 @@ List<Person> results = sqlTemplate.queryForType(Person.class)
     .mappingRowsWith(new PersonMapper())
     .retrieveList(Parameter.with("%Nadine%");
 ```
-
 This library is lightweight and depends only on the JDBC features of the 
-JDK -- i.e. using this SQL template requires only a single (and small) JAR 
-file dependency in your Java EE application.
-
+JDK -- i.e. is addes only a single (small) JAR file dependency to your 
+application.
 
 Getting Started
 ===============

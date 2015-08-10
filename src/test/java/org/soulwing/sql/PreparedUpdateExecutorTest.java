@@ -39,7 +39,7 @@ import org.junit.Test;
  * @author Carl Harris
  */
 public class PreparedUpdateExecutorTest
-    extends AbstractPreparedStatementExecutorTest<Integer> {
+    extends AbstractPreparedStatementExecutorTest<Integer, PreparedStatement> {
 
   private static final int COUNT = -1;
 
@@ -47,15 +47,17 @@ public class PreparedUpdateExecutorTest
   public final JUnitRuleMockery context =
       new JUnitRuleClassImposterizingMockery();
 
+  @Mock
+  private PreparedStatement statement;
+
   @Override
-  protected AbstractPreparedStatementExecutor newExecutor(
-      PreparedStatementCreator psc, List<Parameter> parameters) {
+  protected AbstractPreparedStatementExecutor<Integer, PreparedStatement> newExecutor(
+      PreparedStatementCreator<PreparedStatement> psc, List<Parameter> parameters) {
     return new PreparedUpdateExecutor(psc, parameters);
   }
 
   @Override
-  protected Expectations doExecuteExpectations(
-      final PreparedStatement statement) throws Exception {
+  protected Expectations doExecuteExpectations() throws Exception {
     return new Expectations() {
       {
         oneOf(statement).executeUpdate();
@@ -66,7 +68,7 @@ public class PreparedUpdateExecutorTest
 
   @Test
   public void testExecute() throws Exception {
-    assertThat(validateExecute(context), is(equalTo(COUNT)));
+    assertThat(validateExecute(context, statement), is(equalTo(COUNT)));
   }
 
 }

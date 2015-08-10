@@ -39,24 +39,26 @@ import org.junit.Test;
  * @author Carl Harris
  */
 public class PreparedQueryExecutorTest
-    extends AbstractPreparedStatementExecutorTest<ResultSet> {
+    extends AbstractPreparedStatementExecutorTest<ResultSet, PreparedStatement> {
 
   @Rule
   public final JUnitRuleMockery context =
       new JUnitRuleClassImposterizingMockery();
 
   @Mock
+  private PreparedStatement statement;
+
+  @Mock
   private ResultSet resultSet;
 
   @Override
-  protected AbstractPreparedStatementExecutor newExecutor(
-      PreparedStatementCreator psc, List<Parameter> parameters) {
+  protected AbstractPreparedStatementExecutor<ResultSet, PreparedStatement> newExecutor(
+      PreparedStatementCreator<PreparedStatement> psc, List<Parameter> parameters) {
     return new PreparedQueryExecutor(psc, parameters);
   }
 
   @Override
-  protected Expectations doExecuteExpectations(
-      final PreparedStatement statement) throws Exception {
+  protected Expectations doExecuteExpectations() throws Exception {
     return new Expectations() {
       {
         oneOf(statement).executeQuery();
@@ -67,7 +69,7 @@ public class PreparedQueryExecutorTest
 
   @Test
   public void testExecute() throws Exception {
-    assertThat(validateExecute(context), is(sameInstance(resultSet)));
+    assertThat(validateExecute(context, statement), is(sameInstance(resultSet)));
   }
 
 }

@@ -30,12 +30,15 @@ import javax.sql.DataSource;
  *
  * @author Carl Harris
  */
-abstract class AbstractPreparedStatementExecutor<T> implements SQLExecutor<T> {
+abstract class AbstractPreparedStatementExecutor<T, E extends PreparedStatement>
+    implements SQLExecutor<T> {
 
-  private final PreparedStatementCreator psc;
+  private final PreparedStatementCreator<E> psc;
   private final List<Parameter> parameters;
 
-  public AbstractPreparedStatementExecutor(PreparedStatementCreator psc,
+  private E statement;
+
+  public AbstractPreparedStatementExecutor(PreparedStatementCreator<E> psc,
       List<Parameter> parameters) {
     this.psc = psc;
     this.parameters = parameters;
@@ -43,7 +46,7 @@ abstract class AbstractPreparedStatementExecutor<T> implements SQLExecutor<T> {
 
   @Override
   public T execute(DataSource dataSource) throws SQLException {
-    PreparedStatement statement = psc.prepareStatement(dataSource);
+    statement = psc.prepareStatement(dataSource);
     int index = 1;
     for (Parameter parameter : parameters) {
       parameter.inject(index++, statement);
@@ -51,6 +54,32 @@ abstract class AbstractPreparedStatementExecutor<T> implements SQLExecutor<T> {
     return doExecute(statement);
   }
 
-  protected abstract T doExecute(PreparedStatement statement)
-      throws SQLException;
+  /**
+   * Gets the statement that was prepared and executed
+   * @return statement
+   * @throws IllegalStateException if the statement has not been executed
+   */
+  public E getStatement() {
+    if (statement == null) {
+      throw new IllegalStateException("no statement has been executed");
+    }
+    return statement;
+  }
+
+  /**
+   * Gets the list of statement parameters.
+   * @return parameters
+   */
+  public List<Parameter> getParameters() {
+    return parameters;
+  }
+
+  /**
+   * Executes the given statement.
+   * @param statement the statement to execute
+   * @return return value from statement execution
+   * @throws SQLException
+   */
+  protected abstract T doExecute(E statement) throws SQLException;
+
 }

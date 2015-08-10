@@ -25,10 +25,11 @@ import javax.sql.DataSource;
 
 /**
  * An object responsible for creating and caching a {@link PreparedStatement}.
- *
+ * @param <T> the prepared statement subtype supported by this creator
  * @author Carl Harris
  */
-interface PreparedStatementCreator extends AutoCloseable {
+interface PreparedStatementCreator<T extends PreparedStatement>
+    extends AutoCloseable {
 
   /**
    * Prepares a statement for the SQL associated with this creator.
@@ -37,7 +38,7 @@ interface PreparedStatementCreator extends AutoCloseable {
    *    previously created prepared statement should returned
    * @throws SQLException
    */
-  PreparedStatement prepareStatement(DataSource dataSource) throws SQLException;
+  T prepareStatement(DataSource dataSource) throws SQLException;
 
   /**
    * Closes the statement and associated connection.

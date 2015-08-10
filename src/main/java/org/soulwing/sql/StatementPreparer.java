@@ -21,30 +21,24 @@ package org.soulwing.sql;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.sql.DataSource;
 
 import org.soulwing.sql.source.SQLSource;
 
 /**
- * A thread-safe lazy {@link PreparedStatementCreator}.
+ * A {@link PreparedStatementCreator} that creates {@link PreparedStatement}
+ * objects.
  *
  * @author Carl Harris
  */
-class StatementPreparer implements PreparedStatementCreator {
+class StatementPreparer
+    extends AbstractPreparedStatementCreator<PreparedStatement> {
 
-  private final Lock lock = new ReentrantLock();
-
-  private final String sql;
-
-  private Connection connection;
-
-  private volatile PreparedStatement statement;
-
+  /**
+   * Constructs a new instance.
+   * @param sql the SQL statement to prepare
+   */
   private StatementPreparer(String sql) {
-    this.sql = sql;
+    super(sql);
   }
 
   /**
@@ -68,31 +62,9 @@ class StatementPreparer implements PreparedStatementCreator {
   /**
    * {@inheritDoc}
    */
-  @Override
-  public PreparedStatement prepareStatement(DataSource dataSource)
-      throws SQLException {
-    if (statement == null) {
-      lock.lock();
-      try {
-        if (statement == null) {
-          connection = dataSource.getConnection();
-          statement = connection.prepareStatement(sql);
-        }
-      }
-      finally {
-        lock.unlock();
-      }
-    }
-    return statement;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void close() {
-    SQLUtils.closeQuietly(statement);
-    SQLUtils.closeQuietly(connection);
+  protected PreparedStatement prepareStatement(Connection connection,
+      String sql) throws SQLException {
+    return connection.prepareStatement(sql);
   }
 
 }

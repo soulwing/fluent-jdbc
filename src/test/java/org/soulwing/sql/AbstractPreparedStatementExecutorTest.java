@@ -37,19 +37,18 @@ import org.junit.Rule;
  *
  * @author Carl Harris
  */
-public abstract class AbstractPreparedStatementExecutorTest<T> {
+public abstract class AbstractPreparedStatementExecutorTest
+    <T, E extends PreparedStatement> {
 
-  protected abstract AbstractPreparedStatementExecutor<T> newExecutor(
-      PreparedStatementCreator psc, List<Parameter> parameters);
+  protected abstract AbstractPreparedStatementExecutor<T, E> newExecutor(
+      PreparedStatementCreator<E> psc, List<Parameter> parameters);
 
-  protected abstract Expectations doExecuteExpectations(
-      PreparedStatement statement) throws Exception;
+  protected abstract Expectations doExecuteExpectations() throws Exception;
 
-  protected T validateExecute(Mockery context) throws Exception {
+  protected T validateExecute(Mockery context, final E statement) throws Exception {
     final Parameter parameter1 = context.mock(Parameter.class, "parameter1");
     final Parameter parameter2 = context.mock(Parameter.class, "parameter2");
     final DataSource dataSource = context.mock(DataSource.class);
-    final PreparedStatement statement = context.mock(PreparedStatement.class);
     final PreparedStatementCreator psc =
         context.mock(PreparedStatementCreator.class);
 
@@ -57,7 +56,7 @@ public abstract class AbstractPreparedStatementExecutorTest<T> {
     parameters.add(parameter1);
     parameters.add(parameter2);
 
-    context.checking(doExecuteExpectations(statement));
+    context.checking(doExecuteExpectations());
     context.checking(new Expectations() {
       {
         oneOf(psc).prepareStatement(dataSource);

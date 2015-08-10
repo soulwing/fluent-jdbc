@@ -28,9 +28,16 @@ import java.util.List;
  *
  * @author Carl Harris
  */
-class PreparedUpdateExecutor extends AbstractPreparedStatementExecutor<Integer> {
+class PreparedUpdateExecutor
+    extends AbstractPreparedStatementExecutor<Integer, PreparedStatement> {
 
-  public PreparedUpdateExecutor(PreparedStatementCreator psc,
+  /**
+   * Constructs a new instance
+   * @param psc prepared statement creator for the staement to execute
+   * @param parameters values for placeholders in statement
+   */
+  public PreparedUpdateExecutor(
+      PreparedStatementCreator<PreparedStatement> psc,
       List<Parameter> parameters) {
     super(psc, parameters);
   }

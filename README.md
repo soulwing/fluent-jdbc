@@ -27,7 +27,7 @@ in a particular situation you can instead write code like this:
 List<Person> results = sqlTemplate.queryForType(Person.class)
     .using("SELECT * FROM person where name like ?")
     .mappingRowsWith(new PersonMapper())
-    .retrieveList(Parameter.with("%Nadine%");
+    .retrieveList(Parameter.with("%Nadine%"));
 ```
 This library is lightweight and depends only on the JDBC features of the 
 JDK -- i.e. it adds only a single (small) JAR file dependency to your 

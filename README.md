@@ -229,10 +229,11 @@ VALUES(3, 'Megan Marshall', 27);
 ```
 
 > **NOTE**:
-> At this time, the parser used in Fluent JDBC does not support statements
-> with block constructs containing multiple valid SQL statements, such as those 
-> used in defining stored procedures.  This will be addressed in a future 
-> version.  
+> At this time, the script parser used by `executeScript` does not support 
+> statements with block constructs containing multiple valid SQL statements, 
+> such as those used in defining stored procedures.  This will be addressed 
+> in a future version. Meanwhile, you should use the `execute` method for
+> DDL statements that define stored procedures.
 
 
 Performing Queries and Updates

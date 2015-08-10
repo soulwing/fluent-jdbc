@@ -269,14 +269,10 @@ public class SQLTemplateTest {
     SQLCall call = template.call("{call foo(?, ?)}");
     try {
       call.execute(Parameter.in("bar"), Parameter.out(Types.VARCHAR));
-      List<Parameter> results = call.getOutParameters();
-      assertThat(results.size(), is(equalTo(1)));
-      assertThat((String) results.get(0).getValue(), is(equalTo("bar")));
+      assertThat(call.getOutParameter(2, String.class), is(equalTo("bar")));
 
       call.execute(Parameter.in("baz"), Parameter.out(Types.VARCHAR));
-      results = call.getOutParameters();
-      assertThat(results.size(), is(equalTo(1)));
-      assertThat((String) results.get(0).getValue(), is(equalTo("baz")));
+      assertThat(call.getOutParameter(2, String.class), is(equalTo("baz")));
     }
     finally {
       call.close();

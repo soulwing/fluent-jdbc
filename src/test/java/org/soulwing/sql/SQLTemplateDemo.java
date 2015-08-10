@@ -49,22 +49,22 @@ public class SQLTemplateDemo {
     List<Map> people = sqlTemplate.queryForType(Map.class)
         .using("SELECT * FROM person")
         .mappingRowsWith(new RowMapper<Map>() {
-            public Map mapRow(ResultSet rs, int rowNum)
-                throws SQLException {
-              Map<String, Object> person = new HashMap<>();
-              person.put("id", rs.getLong("id"));
-              person.put("name", rs.getString("name"));
-              person.put("age", rs.getInt("age"));
-              return person;
-            }
+          public Map mapRow(ResultSet rs, int rowNum)
+              throws SQLException {
+            Map<String, Object> person = new HashMap<>();
+            person.put("id", rs.getLong("id"));
+            person.put("name", rs.getString("name"));
+            person.put("age", rs.getInt("age"));
+            return person;
+          }
         })
         .retrieveList();
 
     System.out.format("people: %s\n", people);
 
     try (SQLUpdate updater = sqlTemplate.update()
-            .using("UPDATE person SET age = age + 1 WHERE id = ?")
-            .repeatedly()) {
+        .using("UPDATE person SET age = age + 1 WHERE id = ?")
+        .repeatedly()) {
       updater.execute(Parameter.with(2));
       updater.execute(Parameter.with(3));
     }

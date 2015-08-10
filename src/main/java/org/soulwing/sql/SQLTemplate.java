@@ -19,6 +19,7 @@
  */
 package org.soulwing.sql;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -40,8 +41,9 @@ import org.soulwing.sql.source.SQLSource;
  * SQLTemplate sqlTemplate = new SQLTemplate(dataSource);
  * </pre>
  *
- * A single instance of this class can be concurrently shared by an arbitrary
- * number of application components.
+ * A single instance of this class that is constructed with an appropriate
+ * {@link DataSource} can be concurrently shared by an arbitrary number of
+ * application components.
  *
  * @author Carl Harris
  */
@@ -56,6 +58,26 @@ public class SQLTemplate implements SQLOperations {
    */
   public SQLTemplate(DataSource dataSource) {
     this.dataSource = dataSource;
+  }
+
+  /**
+   * Constructs a new template for use by a single thread.
+   * <p>
+   * Use this constructor to create a template instance that uses the given
+   * connection whenever a connection to the database is needed.  This allows
+   * the template to be used in conjunction with a framework such as
+   * <a href="http://flywaydb.org">Flyway</a> that wants to explicit manage
+   * transaction state by providing a specific connection to each operation
+   * that needs one.
+   * <p>
+   * Because this template uses a single database connection, it should
+   * <em>not</em> be used by multiple concurrent threads.
+   *
+   * @param connection connection that will be used for all JDBC operations
+   *   invoked using the template instance
+   */
+  public SQLTemplate(Connection connection) {
+    this(new SingleConnectionDataSource(connection));
   }
 
   /**

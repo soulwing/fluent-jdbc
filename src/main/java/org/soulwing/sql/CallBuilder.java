@@ -21,7 +21,6 @@ package org.soulwing.sql;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -178,6 +177,9 @@ class CallBuilder implements SQLCall {
     ResultSet rs = null;
     try {
       rs = getExecutor().getStatement().getResultSet();
+      if (rs == null) {
+        throw new IllegalStateException("no result set is available");
+      }
       return handler.handleResult(rs);
     }
     catch (SQLException ex) {
@@ -192,20 +194,24 @@ class CallBuilder implements SQLCall {
    * {@inheritDoc}
    */
   @Override
-  public List<Parameter> getOutParameters()  {
+  public <T> T getOutParameter(int parameterIndex, Class<T> type) {
     try {
-      List<Parameter> returnValues = new ArrayList<>();
-      final CallableStatementExecutor executor = getExecutor();
-      final CallableStatement statement = executor.getStatement();
-      int index = 1;
-      for (Parameter parameter : executor.getParameters()) {
-        if (parameter.isOut()) {
-          returnValues.add(Parameter.with(parameter.getType(),
-              statement.getObject(index)));
-        }
-        index++;
-      }
-      return returnValues;
+      return CallableStatementAccessor.with(executor.getStatement())
+          .get(parameterIndex, type);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <T> T getOutParameter(String parameterName, Class<T> type) {
+    try {
+      return CallableStatementAccessor.with(executor.getStatement())
+          .get(parameterName, type);
     }
     catch (SQLException ex) {
       throw new SQLRuntimeException(ex);

@@ -96,17 +96,20 @@ public interface SQLCall extends AutoCloseable {
   ResultSet getResultSet();
 
   /**
-   * Gets a list containing all parameter values returned by the stored
-   * procedure.
-   * <p>
-   * For maximum portability, this method should not be invoked until
-   * after all result sets and update counts for the execution have been
-   * retrieved/processed.
-   *
-   * @return list of all OUT and INOUT parameters, in the order in which
-   *    they appear in the statement as placeholders
+   * Gets the value of an OUT or INOUT parameter.
+   * @param parameterIndex index of the parameter (starts at 1)
+   * @param type data type
+   * @return parameter value
    */
-  List<Parameter> getOutParameters();
+  <T> T getOutParameter(int parameterIndex, Class<T> type);
+
+  /**
+   * Gets the value of an OUT or INOUT parameter.
+   * @param parameterName name of the parameter
+   * @param type data type
+   * @return parameter value
+   */
+  <T> T getOutParameter(String parameterName, Class<T> type);
 
   /**
    * Processes the current result set using the given handler.

@@ -85,9 +85,7 @@ public class ColumnExtractorTest {
     final Object result = new Object();
     context.checking(new Expectations() {
       {
-        oneOf(rs).findColumn(label);
-        will(returnValue(index));
-        oneOf(rs).getObject(index, Object.class);
+        oneOf(rs).getObject(label, Object.class);
         will(returnValue(result));
       }
     });

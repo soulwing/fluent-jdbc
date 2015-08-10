@@ -18,10 +18,8 @@
  */
 package org.soulwing.sql;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
 
 /**
  * A closure that extracts a single column value from a {@link ResultSet}.
@@ -76,46 +74,11 @@ class ColumnExtractor<T> {
    */
   public T extract(ResultSet rs) throws SQLException {
     if (columnId instanceof String) {
-      return extract(rs, rs.findColumn((String) columnId));
+      return ResultSetAccessor.with(rs).get((String) columnId, type);
     }
     else {
-      return extract(rs, (int) columnId);
+      return ResultSetAccessor.with(rs).get((int) columnId, type);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private T extract(ResultSet rs, int columnIndex) throws SQLException {
-    if (String.class.equals(type)) {
-      return (T) rs.getString(columnIndex);
-    }
-    if (int.class.equals(type) || Integer.class.equals(type)) {
-      return (T) (Integer) rs.getInt(columnIndex);
-    }
-    if (long.class.equals(type) || Long.class.equals(type)) {
-      return (T) (Long) rs.getLong(columnIndex);
-    }
-    if (boolean.class.equals(type) || Boolean.class.equals(type)) {
-      return (T) (Boolean) rs.getBoolean(columnIndex);
-    }
-    if (double.class.equals(type) || Double.class.equals(type)) {
-      return (T) (Double) rs.getDouble(columnIndex);
-    }
-    if (float.class.equals(type) || Float.class.equals(type)) {
-      return (T) (Float) rs.getFloat(columnIndex);
-    }
-    if (short.class.equals(type) || Short.class.equals(type)) {
-      return (T) (Short) rs.getShort(columnIndex);
-    }
-    if (byte.class.equals(type) || Byte.class.equals(type)) {
-      return (T) (Byte) rs.getByte(columnIndex);
-    }
-    if (Date.class.isAssignableFrom(type)) {
-      return (T) rs.getDate(columnIndex);
-    }
-    if (Time.class.isAssignableFrom(type)) {
-      return (T) rs.getTime(columnIndex);
-    }
-    return rs.getObject(columnIndex, type);
   }
 
 }

@@ -29,69 +29,28 @@ import java.io.Reader;
  */
 public class ReaderSQLSource implements SQLSource {
 
-  private final int REPLACEMENT_CHARACTER = '\uFFFD';
-
-  private final int ZERO_WIDTH_NO_BREAK_SPACE = '\uFEFF';
-
-  private final Reader reader;
-  private final Lexer lexer;
-
-  private boolean ready;
+  private final Parser parser;
 
   public ReaderSQLSource(Reader reader) {
     if (!(reader instanceof BufferedReader)) {
       reader = new BufferedReader(reader);
     }
-    this.reader = reader;
-    this.lexer = new Lexer(reader);
+    this.parser = new Parser(reader);
   }
 
   @Override
   public String next() throws SQLInputException {
     try {
-      if (!ready) {
-        stripByteOrderMark();
-        ready = true;
-      }
-      String statement = doNext();
-      while (statement != null && statement.isEmpty()) {
-        statement = doNext();
-      }
-      return statement;
+      return parser.next();
     }
     catch (IOException ex) {
       throw new SQLInputException(ex.getMessage(), ex);
     }
   }
 
-  private void stripByteOrderMark() throws IOException {
-    int c = 0;
-    do {
-      reader.mark(1);
-      c = reader.read();
-    } while (c == REPLACEMENT_CHARACTER || c == ZERO_WIDTH_NO_BREAK_SPACE);
-    reader.reset();
-  }
-
-  private String doNext() throws IOException {
-    StringBuilder statement = new StringBuilder();
-    Lexer.Token token = lexer.next();
-    if (token == null) return null;
-    while (token != null && token.type != Lexer.Token.Type.END_OF_STATEMENT) {
-      if (token.type == Lexer.Token.Type.WHITESPACE) {
-        statement.append(' ');
-      }
-      else if (token.type != Lexer.Token.Type.COMMENT) {
-        statement.append(token.value);
-      }
-      token = lexer.next();
-    }
-    return statement.toString().trim();
-  }
-
   @Override
   public void close() throws IOException {
-    lexer.close();
+    parser.close();
   }
 
 }

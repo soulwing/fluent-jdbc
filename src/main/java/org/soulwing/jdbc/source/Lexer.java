@@ -23,11 +23,15 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * A simple lexer for SQL text.
+ * A simple lexer for "generic" SQL text.
  *
  * @author Carl Harris
  */
 class Lexer implements Closeable {
+
+  private final int REPLACEMENT_CHARACTER = '\uFFFD';
+
+  private final int ZERO_WIDTH_NO_BREAK_SPACE = '\uFEFF';
 
   static class Token {
 
@@ -48,21 +52,21 @@ class Lexer implements Closeable {
       this.value = value;
     }
 
-    Token(Type type) {
-      this(type, null);
-    }
-
   }
 
   private final Reader reader;
-  private StringBuilder text;
   private Token nextToken;
+  private boolean ready;
 
   Lexer(Reader reader) {
     this.reader = reader;
   }
 
   Token next() throws IOException {
+    if (!ready) {
+      stripByteOrderMark();
+      ready = true;
+    }
     Token token = null;
     if (nextToken != null) {
       token = nextToken;
@@ -71,12 +75,11 @@ class Lexer implements Closeable {
     else {
       token = doNext();
       if (token == null) return null;
-      text = new StringBuilder();
+      StringBuilder text = new StringBuilder();
       while (token != null && token.type == Token.Type.STATEMENT_TEXT) {
         text.append((char) token.value);
         token = doNext();
       }
-
       if (text.length() > 0) {
         nextToken = token;
         token = new Token(Token.Type.STATEMENT_TEXT, text.toString());
@@ -85,8 +88,16 @@ class Lexer implements Closeable {
     return token;
   }
 
-  Token doNext() throws IOException {
-    final StringBuilder text = new StringBuilder();
+  private void stripByteOrderMark() throws IOException {
+    int c = 0;
+    do {
+      reader.mark(1);
+      c = reader.read();
+    } while (c == REPLACEMENT_CHARACTER || c == ZERO_WIDTH_NO_BREAK_SPACE);
+    reader.reset();
+  }
+
+  private Token doNext() throws IOException {
     int c = read();
     if (Character.isSpaceChar(c)
         || Character.isWhitespace(c)) {
@@ -128,11 +139,6 @@ class Lexer implements Closeable {
     reader.reset();
   }
 
-  private String readStatementText(int c) throws IOException {
-    StringBuilder sb = new StringBuilder();
-
-    return sb.toString();
-  }
   private String readWhitespace(int c) throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append((char) c);

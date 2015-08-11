@@ -87,7 +87,7 @@ inserts some values into it, and then queries and prints some results.
 
 6   System.out.format("people: %s\n", people);
 
-7   try (SQLUpdate updater = jdbc.update()
+7   try (JdbcUpdate updater = jdbc.update()
             .using("UPDATE person SET age = age + 1 WHERE id = ?")
             .repeatedly()) {
 8     updater.execute(Parameter.with(2));
@@ -412,7 +412,7 @@ final File csvFile = new File("people.csv");
 final String sql = "";
 
 try (CSVReader reader = new CSVReader(csvFile);
-    SQLUpdate updater = jdbc.update().
+    JdbcUpdate updater = jdbc.update().
         .using("INSERT INTO person(id, name, age) VALUES(?, ?, ?)")
         .repeatedly()) {  
   while (reader.hasNext()) {
@@ -558,7 +558,7 @@ handling it that we have when invoking a query:
 * extract a column value from each row (as shown here)
 * handle the result set yourself using a `ResultSetHandler`
 
-See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/SQLCall.html)
+See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/JdbcCall.html)
 for more details on handling return values from stored procedures.
 
 

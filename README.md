@@ -558,7 +558,7 @@ handling it that we have when invoking a query:
 * extract a column value from each row (as shown here)
 * handle the result set yourself using a `ResultSetHandler`
 
-See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/sql/SQLCall.html)
+See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/SQLCall.html)
 for more details on handling return values from stored procedures.
 
 

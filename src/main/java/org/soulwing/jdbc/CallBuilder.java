@@ -196,7 +196,7 @@ class CallBuilder implements JdbcCall {
   @Override
   public <T> T getOutParameter(int parameterIndex, Class<T> type) {
     try {
-      return CallableStatementAccessor.with(executor.getStatement())
+      return CallableStatementAccessor.with(getExecutor().getStatement())
           .get(parameterIndex, type);
     }
     catch (SQLException ex) {
@@ -210,7 +210,7 @@ class CallBuilder implements JdbcCall {
   @Override
   public <T> T getOutParameter(String parameterName, Class<T> type) {
     try {
-      return CallableStatementAccessor.with(executor.getStatement())
+      return CallableStatementAccessor.with(getExecutor().getStatement())
           .get(parameterName, type);
     }
     catch (SQLException ex) {

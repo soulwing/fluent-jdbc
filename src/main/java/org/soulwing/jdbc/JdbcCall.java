@@ -27,7 +27,7 @@ import java.util.List;
  * The {@link #execute(Parameter...)} method be invoked repeatedly with
  * different parameter values.  When the call operation is no longer needed,
  * it <strong>must</strong> be closed by either calling the {@link #close()}
- * method or by nesting it within a {@code try-with-resources} construct.
+ * method or by nesting it within a <em>try-with-resources</em> construct.
  * <p>
  * The call operation supports stored procedures that return values through
  * any combination of

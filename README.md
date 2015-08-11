@@ -2,6 +2,7 @@ Fluent JDBC
 ===========
 
 [![Build Status](https://travis-ci.org/soulwing/fluent-jdbc.svg?branch=master)](https://travis-ci.org/soulwing/fluent-jdbc)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.soulwing.jdbc/fluent-jdbc/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.soulwing.jdbc%20a%3Afluent-jdbc*)
 
 Fluent JDBC is a lightweight façade for performing SQL using JDBC, inspired by
 Spring's `JdbcTemplate`.

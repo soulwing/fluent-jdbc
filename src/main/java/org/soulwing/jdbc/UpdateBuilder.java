@@ -56,6 +56,7 @@ class UpdateBuilder implements JdbcUpdate {
 
   @Override
   public JdbcUpdate using(SQLSource source) {
+    assertNotExecuted();
     return using(SourceUtils.getSingleStatement(source));
   }
 

@@ -63,6 +63,7 @@ class QueryBuilder<T> implements JdbcQuery<T> {
 
   @Override
   public JdbcQuery<T> using(SQLSource source) {
+    assertNotExecuted();
     return using(SourceUtils.getSingleStatement(source));
   }
 
@@ -81,6 +82,7 @@ class QueryBuilder<T> implements JdbcQuery<T> {
 
   @Override
   public JdbcQuery<T> extractingColumn(int index) {
+    assertNotExecuted();
     this.handler = null;
     this.innerHandler = new ColumnExtractingResultSetHandler<>(
         ColumnExtractor.with(index, type));
@@ -89,6 +91,7 @@ class QueryBuilder<T> implements JdbcQuery<T> {
 
   @Override
   public JdbcQuery<T> extractingColumn(String label) {
+    assertNotExecuted();
     this.handler = null;
     this.innerHandler = new ColumnExtractingResultSetHandler<>(
         ColumnExtractor.with(label, type));
@@ -113,13 +116,50 @@ class QueryBuilder<T> implements JdbcQuery<T> {
   @Override
   @SuppressWarnings("unchecked")
   public List<T> retrieveList(Parameter... parameters) {
+    return (List<T>) retrieve(handler != null ? handler : new MultipleRowHandler<>(innerHandler), parameters
+    );
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public T retrieveValue(Parameter... parameters) {
+    return (T) retrieve(handler != null ? handler : new SingleRowHandler<>(innerHandler), parameters
+    );
+  }
+
+  @Override
+  public void execute(Parameter... parameters) {
+    retrieve(handler, parameters);
+  }
+
+  /**
+   * Execute the query and retreive the result.
+   * <p>
+   * If this builder is configured for repeated execution, the JDBC connection
+   * and statement resources will remain open when this method returns.
+   *
+   * @param handler result handler that will produce the result
+   * @param params values for statement placeholders
+   * @return result produced by {@code handler} for the {@link ResultSet}
+   *    returned by the query execution
+   */
+  public Object retrieve(ResultSetHandler<?> handler, Parameter... params) {
     assertReady();
+    final PreparedQueryExecutor executor =
+        new PreparedQueryExecutor(psc,
+            Arrays.asList(params));
+
+    ResultSet rs = null;
     try {
-      return (List<T>) query(parameters,
-          handler != null ? handler : new MultipleRowHandler<>(innerHandler));
+      rs = executor.execute(dataSource);
+      return handler.handleResult(rs);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
     }
     finally {
       executed = true;
+      JdbcUtils.closeQuietly(rs);
       if (!repeatable) {
         close();
       }
@@ -127,18 +167,8 @@ class QueryBuilder<T> implements JdbcQuery<T> {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public T retrieveValue(Parameter... parameters) {
-    assertReady();
-    try {
-      return (T) query(parameters,
-          handler != null ? handler : new SingleRowHandler<>(innerHandler));
-    }
-    finally {
-      if (!repeatable) {
-        close();
-      }
-    }
+  public void close() {
+    JdbcUtils.closeQuietly(psc);
   }
 
   private void assertReady() {
@@ -161,29 +191,6 @@ class QueryBuilder<T> implements JdbcQuery<T> {
       throw new IllegalStateException(
           "query cannot be reconfigured after is has been executed");
     }
-  }
-
-  private Object query(Parameter[] params, ResultSetHandler<?> extractor) {
-    final PreparedQueryExecutor executor =
-        new PreparedQueryExecutor(psc,
-            Arrays.asList(params));
-
-    ResultSet rs = null;
-    try {
-      rs = executor.execute(dataSource);
-      return extractor.handleResult(rs);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-    finally {
-      JdbcUtils.closeQuietly(rs);
-    }
-  }
-
-  @Override
-  public void close() {
-    JdbcUtils.closeQuietly(psc);
   }
 
 }

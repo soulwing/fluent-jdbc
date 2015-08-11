@@ -238,6 +238,18 @@ public interface JdbcQuery<T> extends AutoCloseable {
   T retrieveValue(Parameter... parameters);
 
   /**
+   * Executes the query, processing the result set with the configured handler.
+   * <p>
+   * This method is a synonym for {@link #retrieveValue(Parameter...)}, but
+   * does not return the result produced by the query.  It is typically used
+   * when the query is configured with a {@link ResultSetHandler} that has a
+   * void return type.
+   *
+   * @param parameters values for query placeholders
+   */
+  void execute(Parameter... parameters);
+
+  /**
    * Closes the JDBC resources associated with this query.
    * <p>
    * After a query is closed, its retrieval methods may not be subsequently

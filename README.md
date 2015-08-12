@@ -563,3 +563,52 @@ See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org
 for more details on handling return values from stored procedures.
 
 
+Using a Single Connection
+=========================
+
+Some JDBC frameworks/libraries want to fully manage connection state, by 
+providing `Connection` objects to your code, instead of allowing you to 
+obtain connections from a `DataSource` as needed. [Flyway] (http://flywaydb.org)
+is an example -- when you write a `JdbcMigration`, the `migrate` method gets
+a connection object that it must use to do its work.
+
+In this case, you can construct a `FluentJdbc` instance using the connection 
+object, instead of a data source. Fluent JDBC will use the single connection
+that was provided to it for all JDBC operations you perform using that instance.
+Fluent JDBC will not close this connection -- the creator of the connection is
+responsible for closing it.
+
+**NOTE**:  A `FluentJdbc` instance that is constructed using a `Connection`
+should not be shared with muliple concurrent threads, since most transaction 
+management mechanisms assume a connection-per-thread model.
+
+The following example shows how this works. The first couple of lines of code
+represent "framework" code that has somehow obtained a `DataSource` and gets
+a connection from it.  The code inside of the *try* block represents your code
+that is being invoked by the framework.  
+
+Inside of the *try* block, a `FluentJdbc` instance is created using the 
+connection.  All of the code in the *try* block that uses that instance of 
+`FluentJdbc` is using the same connection to perform JDBC operations.
+
+```
+DataSource dataSource = ...
+try (Connection connection = dataSource.getConnection()) {
+
+  FluentJdbc jdbc = new FluentJdbc(connection);
+
+  jdbc.executeScript(new StringSQLSource(
+      "CREATE TABLE person ( id IDENTITY, name VARCHAR(255), age INTEGER );" +
+      "INSERT INTO PERSON(id, name, age) VALUES(1, 'Jennifer Wilson', 29);" +
+      "INSERT INTO PERSON(id, name, age) VALUES(2, 'Nadine Bennett', 31);" +
+      "INSERT INTO PERSON(id, name, age) VALUES(3, 'Megan Marshall', 27);"));
+
+  int averageAge = jdbc.queryForType(int.class)
+      .using("SELECT AVG(age) FROM person")
+      .extractingColumn()
+      .retrieveValue();
+
+  System.out.format("average age: %d\n", averageAge);
+}
+```
+

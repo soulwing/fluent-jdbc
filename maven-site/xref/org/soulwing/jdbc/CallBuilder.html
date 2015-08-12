@@ -204,7 +204,7 @@
 <a class="jxr_linenumber" name="L196" href="#L196">196</a>   @Override
 <a class="jxr_linenumber" name="L197" href="#L197">197</a>   <strong class="jxr_keyword">public</strong> &lt;T&gt; T getOutParameter(<strong class="jxr_keyword">int</strong> parameterIndex, Class&lt;T&gt; type) {
 <a class="jxr_linenumber" name="L198" href="#L198">198</a>     <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L199" href="#L199">199</a>       <strong class="jxr_keyword">return</strong> CallableStatementAccessor.with(executor.getStatement())
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>       <strong class="jxr_keyword">return</strong> CallableStatementAccessor.with(getExecutor().getStatement())
 <a class="jxr_linenumber" name="L200" href="#L200">200</a>           .get(parameterIndex, type);
 <a class="jxr_linenumber" name="L201" href="#L201">201</a>     }
 <a class="jxr_linenumber" name="L202" href="#L202">202</a>     <strong class="jxr_keyword">catch</strong> (SQLException ex) {
@@ -218,7 +218,7 @@
 <a class="jxr_linenumber" name="L210" href="#L210">210</a>   @Override
 <a class="jxr_linenumber" name="L211" href="#L211">211</a>   <strong class="jxr_keyword">public</strong> &lt;T&gt; T getOutParameter(String parameterName, Class&lt;T&gt; type) {
 <a class="jxr_linenumber" name="L212" href="#L212">212</a>     <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L213" href="#L213">213</a>       <strong class="jxr_keyword">return</strong> CallableStatementAccessor.with(executor.getStatement())
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>       <strong class="jxr_keyword">return</strong> CallableStatementAccessor.with(getExecutor().getStatement())
 <a class="jxr_linenumber" name="L214" href="#L214">214</a>           .get(parameterName, type);
 <a class="jxr_linenumber" name="L215" href="#L215">215</a>     }
 <a class="jxr_linenumber" name="L216" href="#L216">216</a>     <strong class="jxr_keyword">catch</strong> (SQLException ex) {

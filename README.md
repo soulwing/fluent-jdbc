@@ -362,8 +362,9 @@ jdbc.query().
           exporter.exportPerson(rs.getLong("id"), rs.getString("name"), 
               rs.getInt("age")); 
         }
+        return null;
       })
-  .retrieveValue();
+  .execute();
 ```
 
 By using `ResultSetHandler` you get the benefit of a closure based design

@@ -83,17 +83,7 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public void execute(String sql) {
-    final PreparedStatementCreator psc = StatementPreparer.with(sql);
-    final StatementExecutor executor = new StatementExecutor(psc);
-    try {
-      executor.execute(dataSource);
-    }
-    catch (SQLException ex) {
-      throw new SQLRuntimeException(ex);
-    }
-    finally {
-      JdbcUtils.closeQuietly(psc);
-    }
+    doExecute(sql, dataSource);
   }
 
   /**
@@ -109,15 +99,65 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public void executeScript(SQLSource source) {
+    executeScript(source, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void executeScript(SQLSource source, boolean ignoreErrors) {
+    Connection connection = null;
+    Boolean autoCommit = null;
     try {
+      connection = dataSource.getConnection();
+      autoCommit = connection.getAutoCommit();
+      connection.setAutoCommit(true);
+      final SingleConnectionDataSource dataSource =
+          new SingleConnectionDataSource(connection);
       String sql = source.next();
       while (sql != null) {
-        execute(sql);
+        try {
+          doExecute(sql, dataSource);
+        }
+        catch (SQLRuntimeException ex) {
+          if (!ignoreErrors) {
+            throw ex;
+          }
+        }
         sql = source.next();
       }
     }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
     finally {
       JdbcUtils.closeQuietly(source);
+      if (autoCommit != null) {
+        try {
+          connection.setAutoCommit(autoCommit);
+        }
+        catch (SQLException ex) {
+          throw new SQLRuntimeException(ex);
+        }
+      }
+      if (connection != null) {
+        JdbcUtils.closeQuietly(connection);
+      }
+    }
+  }
+
+  private void doExecute(String sql, DataSource dataSource) {
+    final PreparedStatementCreator psc = StatementPreparer.with(sql);
+    final StatementExecutor executor = new StatementExecutor(psc);
+    try {
+      executor.execute(dataSource);
+    }
+    catch (SQLException ex) {
+      throw new SQLRuntimeException(ex);
+    }
+    finally {
+      JdbcUtils.closeQuietly(psc);
     }
   }
 

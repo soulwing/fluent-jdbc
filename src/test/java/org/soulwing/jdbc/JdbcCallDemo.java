@@ -33,12 +33,12 @@ public class JdbcCallDemo {
   public static void main(String[] args) {
     TestDatabase db = new TestDatabase();
 
-    FluentJdbc fluent = new FluentJdbc(db.getDataSource());
+    FluentJdbc jdbc = new FluentJdbc(db.getDataSource());
 
-    fluent.execute(
+    jdbc.execute(
         "CREATE TABLE person ( id IDENTITY, name VARCHAR(50), age INTEGER )");
 
-    fluent.execute(
+    jdbc.execute(
         "CREATE PROCEDURE add_person " +
             "(IN p_name VARCHAR(50), IN p_age INTEGER, OUT p_id BIGINT) " +
             "MODIFIES SQL DATA " +
@@ -47,7 +47,7 @@ public class JdbcCallDemo {
             "SET p_id = IDENTITY(); " +
             "END");
 
-    try (JdbcCall call = fluent.call("{call add_person(?, ?, ?)}")) {
+    try (JdbcCall call = jdbc.call("{call add_person(?, ?, ?)}")) {
       call.execute(
           Parameter.in("Megan Marshall"),
           Parameter.in(29),
@@ -58,13 +58,13 @@ public class JdbcCallDemo {
     }
 
 
-    try (JdbcCall call = fluent.call("{ call add_person(?, ?, ?) }")) {
+    try (JdbcCall call = jdbc.call("{ call add_person(?, ?, ?) }")) {
       createPerson("Jennifer Wilson", 29, call);
       createPerson("Nadine Bennett", 31, call);
       createPerson("Megan Marshall", 27, call);
     }
 
-    fluent.query()
+    jdbc.query()
         .using("SELECT * from PERSON ORDER BY age")
         .handlingResultWith(new ResultSetHandler<Void>() {
             @Override
@@ -78,7 +78,7 @@ public class JdbcCallDemo {
         })
         .retrieveValue();
 
-    fluent.execute(
+    jdbc.execute(
         "CREATE PROCEDURE find_persons_by_name(IN p_name VARCHAR(50)) " +
         "  READS SQL DATA " +
         "  DYNAMIC RESULT SETS 1 " +
@@ -88,7 +88,7 @@ public class JdbcCallDemo {
         "  OPEN result; " +
         "END");
 
-    try (JdbcCall call = fluent.call("{ call find_persons_by_name(?) }")) {
+    try (JdbcCall call = jdbc.call("{ call find_persons_by_name(?) }")) {
       boolean hasResultSet = call.execute(Parameter.in("%Nadine%"));
       if (hasResultSet || call.getMoreResults()) {
         List<String> names = call.retrieveList("name", String.class);

@@ -19,6 +19,7 @@
  */
 package org.soulwing.jdbc;
 
+import java.lang.reflect.Field;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -31,10 +32,16 @@ import java.sql.Types;
  */
 public class Parameter {
 
+  private static final Field[] typeFields;
+
   private final int type;
   private final Object value;
   private final boolean in;
   private final boolean out;
+
+  static {
+    typeFields = Types.class.getFields();
+  }
 
   /**
    * Constructs a new instance.
@@ -192,6 +199,42 @@ public class Parameter {
    */
   boolean isOut() {
     return out;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    if (in) {
+      sb.append("IN");
+    }
+    if (out) {
+      sb.append("OUT");
+    }
+    if (in) {
+      sb.append(" value={");
+      sb.append(value);
+      sb.append("}");
+    }
+    if (type != Types.NULL) {
+      sb.append(" type=");
+      sb.append(typeToString(type));
+    }
+    return sb.toString();
+  }
+
+  private static String typeToString(int type) {
+    for (Field field : typeFields) {
+      try {
+        int value = field.getInt(Types.class);
+        if (value == type) {
+          return field.getName();
+        }
+      }
+      catch (IllegalAccessException ex) {
+        assert true;   // oh, well
+      }
+    }
+    return Integer.toString(type);
   }
 
 }

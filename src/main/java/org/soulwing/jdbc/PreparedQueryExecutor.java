@@ -21,7 +21,8 @@ package org.soulwing.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * An {@link JdbcExecutor} that executes a prepared query.
@@ -35,10 +36,11 @@ class PreparedQueryExecutor
    * Constructs a new instance
    * @param psc prepared statement creator for the staement to execute
    * @param parameters values for placeholders in statement
+   * @param logger statement logger
    */
   public PreparedQueryExecutor(PreparedStatementCreator<PreparedStatement> psc,
-       List<Parameter> parameters) {
-    super(psc, parameters);
+       Parameter[] parameters, JdbcLogger logger) {
+    super(psc, parameters, logger);
   }
 
   /**

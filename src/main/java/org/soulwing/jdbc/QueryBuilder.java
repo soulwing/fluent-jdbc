@@ -18,13 +18,14 @@
  */
 package org.soulwing.jdbc;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.soulwing.jdbc.logger.JdbcLogger;
 import org.soulwing.jdbc.source.SQLSource;
 
 /**
@@ -36,8 +37,9 @@ class QueryBuilder<T> implements JdbcQuery<T> {
 
   private final Class<T> type;
   private final DataSource dataSource;
+  private final JdbcLogger logger;
 
-  private PreparedStatementCreator psc;
+  private PreparedStatementCreator<PreparedStatement> psc;
   private ResultSetHandler<T> handler;
   private ResultSetHandler<T> innerHandler;
   private boolean repeatable;
@@ -47,11 +49,12 @@ class QueryBuilder<T> implements JdbcQuery<T> {
    * Constructs a new instance.
    * @param type data type returned by this query
    * @param dataSource data source from which a connection will be obtained
-   *
+   * @param logger statement logger
    */
-  public QueryBuilder(Class<T> type, DataSource dataSource) {
+  public QueryBuilder(Class<T> type, DataSource dataSource, JdbcLogger logger) {
     this.type = type;
     this.dataSource = dataSource;
+    this.logger = logger;
   }
 
   @Override
@@ -146,8 +149,7 @@ class QueryBuilder<T> implements JdbcQuery<T> {
   public Object retrieve(ResultSetHandler<?> handler, Parameter... params) {
     assertReady();
     final PreparedQueryExecutor executor =
-        new PreparedQueryExecutor(psc,
-            Arrays.asList(params));
+        new PreparedQueryExecutor(psc, params, logger);
 
     ResultSet rs = null;
     try {

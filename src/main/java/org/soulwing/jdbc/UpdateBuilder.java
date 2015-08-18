@@ -18,11 +18,12 @@
  */
 package org.soulwing.jdbc;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
 
 import javax.sql.DataSource;
 
+import org.soulwing.jdbc.logger.JdbcLogger;
 import org.soulwing.jdbc.source.SQLSource;
 
 /**
@@ -33,18 +34,20 @@ import org.soulwing.jdbc.source.SQLSource;
 class UpdateBuilder implements JdbcUpdate {
 
   private final DataSource dataSource;
+  private final JdbcLogger logger;
 
-  private PreparedStatementCreator psc;
+  private PreparedStatementCreator<PreparedStatement> psc;
   private boolean repeatable;
   private boolean executed;
 
   /**
    * Constructs a new instance.
    * @param dataSource data source from which a connection will be obtained
-   *
+   * @param logger statement logger
    */
-  public UpdateBuilder(DataSource dataSource) {
+  public UpdateBuilder(DataSource dataSource, JdbcLogger logger) {
     this.dataSource = dataSource;
+    this.logger = logger;
   }
 
   @Override
@@ -71,7 +74,7 @@ class UpdateBuilder implements JdbcUpdate {
   public int execute(Parameter... parameters) {
     assertReady();
     final PreparedUpdateExecutor executor = new PreparedUpdateExecutor(
-        psc, Arrays.asList(parameters));
+        psc, parameters, logger);
 
     try {
       return executor.execute(dataSource);

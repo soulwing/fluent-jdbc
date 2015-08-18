@@ -229,6 +229,13 @@ VALUES(3, 'Megan Marshall', 27);
 */
 ```
 
+When executing a script, Fluent JDBC uses a single connection to execute
+every statement in the file.  Moreover, it configures the connection to
+utilize auto-commit mode, so that each statement in the script is committed 
+on successful execution.  This enables Fluent JDBC to support an execution 
+mode in which all errors encountered while executing the script are ignored, 
+which is useful in schema drop-create scenarios.
+
 > **NOTE**:
 > At this time, the script parser used by `executeScript` does not support 
 > statements with block constructs containing multiple valid SQL statements, 
@@ -613,3 +620,28 @@ try (Connection connection = dataSource.getConnection()) {
 }
 ```
 
+Logging SQL Statements
+======================
+
+Fluent JDBC supports logging of both SQL statements and bound placeholder 
+values.  Enabling statement logging on `System.out` is as simple as this:
+
+```
+FluentJdbc jdbc = new FluentJdbc(...);
+jdbc.setLogger(System.out);
+```
+
+If you want to log both statements and bound parameter values, specify
+the additional `traceEnabled` flag value as `true`:
+
+```
+jdbc.setLogger(System.out, true);
+```
+
+In addition to logging to `System.out` you can also configure Fluent JDBC
+to use any implementation of its `JdbcLogger` interface.  This interface
+provides a simplified API that can easily be implemented to adapt any
+logging framework.  What's more, Fluent JDBC includes support for many popular
+frameworks, including *Slf4j*, *Commons Logging*, and *java.util.Logging (JULI)*.
+See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/logger)
+for complete details.

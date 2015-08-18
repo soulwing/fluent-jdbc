@@ -32,6 +32,12 @@ interface PreparedStatementCreator<T extends PreparedStatement>
     extends AutoCloseable {
 
   /**
+   * Gets the text of the SQL statement associated with this creator.
+   * @return statement text
+   */
+  String getStatementText();
+
+  /**
    * Prepares a statement for the SQL associated with this creator.
    * @param dataSource connection to use
    * @return prepared statement; if a statement has already been prepared, the

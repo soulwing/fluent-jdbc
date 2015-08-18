@@ -23,13 +23,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import java.sql.PreparedStatement;
-import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * Unit tests for {@link PreparedUpdateExecutor}.
@@ -40,6 +40,7 @@ public class PreparedUpdateExecutorTest
     extends AbstractPreparedStatementExecutorTest<Integer, PreparedStatement> {
 
   private static final int COUNT = -1;
+  private static final String SQL = "some SQL statement";
 
   @Rule
   public final JUnitRuleMockery context =
@@ -48,16 +49,21 @@ public class PreparedUpdateExecutorTest
   @Mock
   private PreparedStatement statement;
 
+  @Mock
+  private JdbcLogger logger;
+
   @Override
   protected AbstractPreparedStatementExecutor<Integer, PreparedStatement> newExecutor(
-      PreparedStatementCreator<PreparedStatement> psc, List<Parameter> parameters) {
-    return new PreparedUpdateExecutor(psc, parameters);
+      PreparedStatementCreator<PreparedStatement> psc, Parameter[] parameters) {
+    return new PreparedUpdateExecutor(psc, parameters, logger);
   }
 
   @Override
   protected Expectations doExecuteExpectations() throws Exception {
     return new Expectations() {
       {
+        oneOf(logger).writeStatement(SQL);
+        oneOf(logger).writeParameters(with(any(Parameter[].class)));
         oneOf(statement).executeUpdate();
         will(returnValue(COUNT));
       }

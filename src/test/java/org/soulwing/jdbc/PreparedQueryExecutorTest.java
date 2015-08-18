@@ -24,13 +24,13 @@ import static org.hamcrest.Matchers.sameInstance;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * Unit tests for {@link PreparedQueryExecutor}.
@@ -48,18 +48,23 @@ public class PreparedQueryExecutorTest
   private PreparedStatement statement;
 
   @Mock
+  private JdbcLogger logger;
+
+  @Mock
   private ResultSet resultSet;
 
   @Override
   protected AbstractPreparedStatementExecutor<ResultSet, PreparedStatement> newExecutor(
-      PreparedStatementCreator<PreparedStatement> psc, List<Parameter> parameters) {
-    return new PreparedQueryExecutor(psc, parameters);
+      PreparedStatementCreator<PreparedStatement> psc, Parameter[] parameters) {
+    return new PreparedQueryExecutor(psc, parameters, logger);
   }
 
   @Override
   protected Expectations doExecuteExpectations() throws Exception {
     return new Expectations() {
       {
+        oneOf(logger).writeStatement(SQL);
+        oneOf(logger).writeParameters(with(any(Parameter[].class)));
         oneOf(statement).executeQuery();
         will(returnValue(resultSet));
       }

@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.fail;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -33,10 +32,10 @@ import javax.sql.DataSource;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * Unit tests for {@link CallBuilder}.
@@ -64,6 +63,9 @@ public class CallBuilderTest {
   private PreparedStatementCreator<CallableStatement> psc;
 
   @Mock
+  private JdbcLogger logger;
+
+  @Mock
   private DataSource dataSource;
 
   @Mock
@@ -82,7 +84,7 @@ public class CallBuilderTest {
 
   @Before
   public void setUp() throws Exception {
-    call = new CallBuilder(dataSource, psc);
+    call = new CallBuilder(dataSource, psc, logger);
   }
 
   @Test
@@ -354,6 +356,10 @@ public class CallBuilderTest {
       final Parameter... parameters) throws Exception {
     return new Expectations() {
       {
+        oneOf(psc).getStatementText();
+        will(returnValue(SQL));
+        oneOf(logger).writeStatement(SQL);
+        oneOf(logger).writeParameters(parameters);
         oneOf(psc).prepareStatement(dataSource);
         will(returnValue(statement));
         for (int index = 0; index < parameters.length; index++) {

@@ -22,13 +22,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.sql.CallableStatement;
-import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * Unit tests for {@link PreparedQueryExecutor}.
@@ -45,16 +45,21 @@ public class CallableStatementExecutorTest
   @Mock
   private CallableStatement statement;
 
+  @Mock
+  private JdbcLogger logger;
+
   @Override
   protected AbstractPreparedStatementExecutor<Boolean, CallableStatement> newExecutor(
-      PreparedStatementCreator<CallableStatement> psc, List<Parameter> parameters) {
-    return new CallableStatementExecutor(psc, parameters);
+      PreparedStatementCreator<CallableStatement> psc, Parameter[] parameters) {
+    return new CallableStatementExecutor(psc, parameters, logger);
   }
 
   @Override
   protected Expectations doExecuteExpectations() throws Exception {
     return new Expectations() {
       {
+        oneOf(logger).writeStatement(SQL);
+        oneOf(logger).writeParameters(with(any(Parameter[].class)));
         oneOf(statement).execute();
         will(returnValue(true));
       }

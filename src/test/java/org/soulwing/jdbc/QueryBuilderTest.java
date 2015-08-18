@@ -33,10 +33,10 @@ import javax.sql.DataSource;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 import org.soulwing.jdbc.source.SQLSource;
 
 /**
@@ -78,11 +78,14 @@ public class QueryBuilderTest {
   @Mock
   private RowMapper<Object> rowMapper;
 
+  @Mock
+  private JdbcLogger logger;
+
   private QueryBuilder<Object> query;
 
   @Before
   public void setUp() throws Exception {
-    query = new QueryBuilder<>(Object.class, dataSource);
+    query = new QueryBuilder<>(Object.class, dataSource, logger);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -307,6 +310,8 @@ public class QueryBuilderTest {
           oneOf(statement).setObject(index, parameters[index].getValue(),
               parameters[index].getType());
         }
+        oneOf(logger).writeStatement(SQL);
+        oneOf(logger).writeParameters(with(any(Parameter[].class)));
         oneOf(statement).executeQuery();
         will(returnValue(resultSet));
       }

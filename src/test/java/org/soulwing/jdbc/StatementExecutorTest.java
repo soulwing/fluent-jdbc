@@ -27,6 +27,7 @@ import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * Unit tests for {@link StatementExecutor}.
@@ -34,6 +35,8 @@ import org.junit.Test;
  * @author Carl Harris
  */
 public class StatementExecutorTest {
+
+  private static final String TEXT = "some statement text";
 
   @Rule
   public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -45,12 +48,18 @@ public class StatementExecutorTest {
   private PreparedStatement statement;
 
   @Mock
+  private JdbcLogger logger;
+
+  @Mock
   private PreparedStatementCreator psc;
 
   @Test
   public void testExecute() throws Exception {
     context.checking(new Expectations() {
       {
+        oneOf(psc).getStatementText();
+        will(returnValue(TEXT));
+        oneOf(logger).writeStatement(TEXT);
         oneOf(psc).prepareStatement(dataSource);
         will(returnValue(statement));
         oneOf(statement).execute();
@@ -58,7 +67,7 @@ public class StatementExecutorTest {
       }
     });
 
-    StatementExecutor executor = new StatementExecutor(psc);
+    StatementExecutor executor = new StatementExecutor(psc, logger);
     executor.execute(dataSource);
   }
 

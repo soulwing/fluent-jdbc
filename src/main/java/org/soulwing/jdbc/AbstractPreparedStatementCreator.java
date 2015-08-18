@@ -58,6 +58,14 @@ abstract class AbstractPreparedStatementCreator<T extends PreparedStatement>
    * {@inheritDoc}
    */
   @Override
+  public String getStatementText() {
+    return sql;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public T prepareStatement(DataSource dataSource)
       throws SQLException {
     if (statement == null) {

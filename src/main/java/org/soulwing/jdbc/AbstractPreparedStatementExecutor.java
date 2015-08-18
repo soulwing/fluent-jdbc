@@ -20,9 +20,10 @@ package org.soulwing.jdbc;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.sql.DataSource;
+
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * An abstract base for executing {@link PreparedStatement} objects.
@@ -33,22 +34,25 @@ abstract class AbstractPreparedStatementExecutor<T, E extends PreparedStatement>
     implements JdbcExecutor<T> {
 
   private final PreparedStatementCreator<E> psc;
-  private final List<Parameter> parameters;
+  private final Parameter[] parameters;
+  private final JdbcLogger logger;
 
   private E statement;
 
   public AbstractPreparedStatementExecutor(PreparedStatementCreator<E> psc,
-      List<Parameter> parameters) {
+      Parameter[] parameters, JdbcLogger logger) {
     this.psc = psc;
     this.parameters = parameters;
+    this.logger = logger;
   }
 
   @Override
   public T execute(DataSource dataSource) throws SQLException {
+    logger.writeStatement(psc.getStatementText());
+    logger.writeParameters(parameters);
     statement = psc.prepareStatement(dataSource);
-    int index = 1;
-    for (Parameter parameter : parameters) {
-      parameter.inject(index++, statement);
+    for (int index = 0, max = parameters.length; index < max; index++) {
+      parameters[index].inject(index + 1, statement);
     }
     return doExecute(statement);
   }
@@ -66,10 +70,10 @@ abstract class AbstractPreparedStatementExecutor<T, E extends PreparedStatement>
   }
 
   /**
-   * Gets the list of statement parameters.
+   * Gets the statement parameters.
    * @return parameters
    */
-  public List<Parameter> getParameters() {
+  public Parameter[] getParameters() {
     return parameters;
   }
 

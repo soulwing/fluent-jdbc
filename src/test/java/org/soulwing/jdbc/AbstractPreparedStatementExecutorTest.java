@@ -36,8 +36,10 @@ import org.jmock.Mockery;
 public abstract class AbstractPreparedStatementExecutorTest
     <T, E extends PreparedStatement> {
 
+  protected static final String SQL = "some SQL statement";
+
   protected abstract AbstractPreparedStatementExecutor<T, E> newExecutor(
-      PreparedStatementCreator<E> psc, List<Parameter> parameters);
+      PreparedStatementCreator<E> psc, Parameter[] parameters);
 
   protected abstract Expectations doExecuteExpectations() throws Exception;
 
@@ -48,17 +50,19 @@ public abstract class AbstractPreparedStatementExecutorTest
     final PreparedStatementCreator psc =
         context.mock(PreparedStatementCreator.class);
 
-    final List<Parameter> parameters = new ArrayList<>();
-    parameters.add(parameter1);
-    parameters.add(parameter2);
+    final Parameter[] parameters = new Parameter[2];
+    parameters[0] = parameter1;
+    parameters[1] = parameter2;
 
     context.checking(doExecuteExpectations());
     context.checking(new Expectations() {
       {
+        oneOf(psc).getStatementText();
+        will(returnValue(SQL));
         oneOf(psc).prepareStatement(dataSource);
         will(returnValue(statement));
-        for (int i = 0; i < parameters.size(); i++) {
-          oneOf(parameters.get(i)).inject(i + 1, statement);
+        for (int i = 0; i < parameters.length; i++) {
+          oneOf(parameters[i]).inject(i + 1, statement);
         }
       }
     });

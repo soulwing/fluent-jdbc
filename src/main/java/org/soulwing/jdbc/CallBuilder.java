@@ -21,10 +21,11 @@ package org.soulwing.jdbc;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
+
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * A concrete {@link JdbcCall} implementation.
@@ -35,6 +36,7 @@ class CallBuilder implements JdbcCall {
 
   private final DataSource dataSource;
   private final PreparedStatementCreator<CallableStatement> psc;
+  private final JdbcLogger logger;
 
   private CallableStatementExecutor executor;
 
@@ -43,11 +45,13 @@ class CallBuilder implements JdbcCall {
    * @param dataSource dataSource from which connections will be obtained as
    *    needed
    * @param psc prepared statement creator for the call
+   * @param logger statement logger
    */
   public CallBuilder(DataSource dataSource,
-      PreparedStatementCreator<CallableStatement> psc) {
+      PreparedStatementCreator<CallableStatement> psc, JdbcLogger logger) {
     this.dataSource = dataSource;
     this.psc = psc;
+    this.logger = logger;
   }
 
   /**
@@ -55,7 +59,7 @@ class CallBuilder implements JdbcCall {
    */
   @Override
   public boolean execute(Parameter... parameters) {
-    executor = new CallableStatementExecutor(psc, Arrays.asList(parameters));
+    executor = new CallableStatementExecutor(psc, parameters, logger);
     try {
       return executor.execute(dataSource);
     }

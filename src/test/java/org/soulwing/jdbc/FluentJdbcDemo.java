@@ -23,7 +23,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.soulwing.jdbc.logger.JuliLogger;
 import org.soulwing.jdbc.source.StringSQLSource;
 
 /**
@@ -34,8 +38,15 @@ import org.soulwing.jdbc.source.StringSQLSource;
 public class FluentJdbcDemo {
 
   public static void main(String[] args) {
+    Logger logger = Logger.getLogger(FluentJdbcDemo.class.getSimpleName());
+    ConsoleHandler handler = new ConsoleHandler();
+    handler.setLevel(Level.ALL);
+    logger.addHandler(handler);
+    logger.setLevel(Level.FINE);
+
     TestDatabase db = new TestDatabase();
     FluentJdbc jdbc = new FluentJdbc(db.getDataSource());
+    jdbc.setLogger(new JuliLogger(logger));
 
     jdbc.execute("CREATE TABLE person ( " +
         "id BIGINT PRIMARY KEY, name VARCHAR(50), age INTEGER )");

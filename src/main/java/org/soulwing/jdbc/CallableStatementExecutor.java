@@ -21,7 +21,8 @@ package org.soulwing.jdbc;
 
 import java.sql.CallableStatement;
 import java.sql.SQLException;
-import java.util.List;
+
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * An {@link JdbcExecutor} that executes a stored procedure call.
@@ -35,11 +36,13 @@ class CallableStatementExecutor
    * Constructs a new instance.
    * @param psc prepared statement creator for the call statement
    * @param parameters values for placeholders in the statement
+   * @param logger statement logger
    */
   public CallableStatementExecutor(
       PreparedStatementCreator<CallableStatement> psc,
-      List<Parameter> parameters) {
-    super(psc, parameters);
+      Parameter[] parameters,
+      JdbcLogger logger) {
+    super(psc, parameters, logger);
   }
 
   @Override

@@ -22,6 +22,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.soulwing.jdbc.logger.JdbcLogger;
+
 /**
  * A simple JDBC {@link java.sql.Statement} executor.
  *
@@ -30,13 +32,17 @@ import javax.sql.DataSource;
 class StatementExecutor implements JdbcExecutor<Void> {
 
   private final PreparedStatementCreator psc;
+  private final JdbcLogger logger;
 
   /***
    * Constructs a new instance.
    * @param psc prepared statement creator
+   * @param logger statement logger
    */
-  public StatementExecutor(PreparedStatementCreator psc) {
+  public StatementExecutor(PreparedStatementCreator psc,
+      JdbcLogger logger) {
     this.psc = psc;
+    this.logger = logger;
   }
 
   /**
@@ -44,6 +50,7 @@ class StatementExecutor implements JdbcExecutor<Void> {
    */
   @Override
   public Void execute(DataSource dataSource) throws SQLException {
+    logger.writeStatement(psc.getStatementText());
     psc.prepareStatement(dataSource).execute();
     return null;
   }

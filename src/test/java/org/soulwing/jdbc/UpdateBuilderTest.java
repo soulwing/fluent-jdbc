@@ -34,6 +34,7 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.soulwing.jdbc.logger.JdbcLogger;
 import org.soulwing.jdbc.source.SQLSource;
 
 /**
@@ -61,11 +62,14 @@ public class UpdateBuilderTest {
   @Mock
   private SQLSource source;
 
+  @Mock
+  private JdbcLogger logger;
+
   private UpdateBuilder updater;
 
   @Before
   public void setUp() throws Exception {
-    updater = new UpdateBuilder(dataSource);
+    updater = new UpdateBuilder(dataSource, logger);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -160,6 +164,8 @@ public class UpdateBuilderTest {
           oneOf(statement).setObject(index, parameters[index].getValue(),
               parameters[index].getType());
         }
+        oneOf(logger).writeStatement(SQL);
+        oneOf(logger).writeParameters(with(any(Parameter[].class)));
         oneOf(statement).executeUpdate();
         will(returnValue(updateCount));
       }

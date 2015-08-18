@@ -19,11 +19,16 @@
  */
 package org.soulwing.jdbc;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.soulwing.jdbc.logger.JdbcLogger;
+import org.soulwing.jdbc.logger.NullLogger;
+import org.soulwing.jdbc.logger.PrintWriterLogger;
 import org.soulwing.jdbc.source.SQLSource;
 
 /**
@@ -48,6 +53,7 @@ import org.soulwing.jdbc.source.SQLSource;
 public class FluentJdbc implements JdbcOperations {
 
   private final DataSource dataSource;
+  private JdbcLogger logger = NullLogger.INSTANCE;
 
   /**
    * Constructs a new instance.
@@ -149,7 +155,7 @@ public class FluentJdbc implements JdbcOperations {
 
   private void doExecute(String sql, DataSource dataSource) {
     final PreparedStatementCreator psc = StatementPreparer.with(sql);
-    final StatementExecutor executor = new StatementExecutor(psc);
+    final StatementExecutor executor = new StatementExecutor(psc, logger);
     try {
       executor.execute(dataSource);
     }
@@ -174,7 +180,7 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public <T> JdbcQuery<T> queryForType(Class<T> type) {
-    return new QueryBuilder<>(type, dataSource);
+    return new QueryBuilder<>(type, dataSource, logger);
   }
 
   /**
@@ -182,7 +188,7 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public JdbcUpdate update() {
-    return new UpdateBuilder(dataSource);
+    return new UpdateBuilder(dataSource, logger);
   }
 
   /**
@@ -190,7 +196,7 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public JdbcCall call(String sql) {
-    return new CallBuilder(dataSource, CallPreparer.with(sql));
+    return new CallBuilder(dataSource, CallPreparer.with(sql), logger);
   }
 
   /**
@@ -198,7 +204,55 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public JdbcCall call(SQLSource source) {
-    return new CallBuilder(dataSource, CallPreparer.with(source));
+    return new CallBuilder(dataSource, CallPreparer.with(source), logger);
+  }
+
+  /**
+   * Sets the logger to use for SQL statement logging.
+   * @param logger the logger to set (may be {@code null} to disable logging)
+   */
+  public void setLogger(JdbcLogger logger) {
+    if (logger == null) {
+      logger = NullLogger.INSTANCE;
+    }
+    this.logger = logger;
+  }
+
+  /**
+   * Sets a print writer to use for SQL statement logging.
+   * @param writer the logger to set (may be {@code null} to disable logging)
+   */
+  public void setLogger(PrintWriter writer) {
+    setLogger(writer, false);
+  }
+
+  /**
+   * Sets a print writer to use for SQL statement logging.
+   * @param writer the logger to set (may be {@code null} to disable logging)
+   * @param traceEnabled flag indicating whether trace level logging should
+   *    be used
+   */
+  public void setLogger(PrintWriter writer, boolean traceEnabled) {
+    setLogger(new PrintWriterLogger(writer, traceEnabled));
+  }
+
+  /**
+   * Sets a print stream to use for SQL statement logging.
+   * @param stream the logger to set (may be {@code null} to disable logging)
+   */
+  public void setLogger(PrintStream stream) {
+    setLogger(stream, false);
+  }
+
+  /**
+   * Sets a print stream to use for SQL statement logging.
+   * @param stream the logger to set (may be {@code null} to disable logging)
+   * @param traceEnabled flag indicating whether trace level logging should
+   *    be used
+   *
+   */
+  public void setLogger(PrintStream stream, boolean traceEnabled) {
+    setLogger(new PrintWriterLogger(stream, traceEnabled));
   }
 
 }

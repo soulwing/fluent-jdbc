@@ -639,9 +639,10 @@ jdbc.setLogger(System.out, true);
 ```
 
 In addition to logging to `System.out` you can also configure Fluent JDBC
-to use any implementation of its `JdbcLogger` interface.  This interface
-provides a simplified API that can easily be implemented to adapt any
-logging framework.  What's more, Fluent JDBC includes support for many popular
-frameworks, including *Slf4j*, *Commons Logging*, and *java.util.Logging (JULI)*.
-See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/logger)
+to use any implementation of its `JdbcLogger` interface.  This is a 
+very simple simple adapter interface that can easily be implemented to work
+with almost any logging framework.  What's more, Fluent JDBC includes support for 
+many popular frameworks, including *Slf4j*, *Commons Logging*, and 
+*java.util.Logging (JULI)*. See the [Javadocs]
+(http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/logger)
 for complete details.

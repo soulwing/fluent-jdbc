@@ -644,5 +644,5 @@ very simple simple adapter interface that can easily be implemented to work
 with almost any logging framework.  What's more, Fluent JDBC includes support for 
 many popular frameworks, including *Slf4j*, *Commons Logging*, and 
 *java.util.Logging (JULI)*. See the [Javadocs]
-(http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/logger)
+(http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/logger/JdbcLogger.html)
 for complete details.

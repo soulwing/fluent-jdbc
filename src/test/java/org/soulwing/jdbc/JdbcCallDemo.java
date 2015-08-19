@@ -23,6 +23,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import org.soulwing.jdbc.logger.FormattingJdbcLogger;
+import org.soulwing.jdbc.logger.PrintWriterJdbcLogger;
+
 /**
  * A simple demo of some of the features of the library.
  *
@@ -34,6 +37,7 @@ public class JdbcCallDemo {
     TestDatabase db = new TestDatabase();
 
     FluentJdbc jdbc = new FluentJdbc(db.getDataSource());
+    jdbc.setLogger(new FormattingJdbcLogger(new PrintWriterJdbcLogger(System.out)));
 
     jdbc.execute(
         "CREATE TABLE person ( id IDENTITY, name VARCHAR(50), age INTEGER )");

@@ -1,5 +1,5 @@
 /*
- * File created on Aug 18, 2015
+ * File created on Aug 19, 2015
  *
  * Copyright (c) 2015 Carl Harris, Jr
  * and others as noted
@@ -18,22 +18,20 @@
  */
 package org.soulwing.jdbc.logger;
 
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.soulwing.jdbc.Parameter;
-import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
- * A {@link JdbcLogger} that delegates to an
- * <a href="http://slf4j.org">slf4j</a> {@code Logger}.
+ * A {@link JdbcLogger} that delegates to a Log4j 2 {@code Logger}.
  * <p>
- * In order to use this class, you must include <em>slf4j</em> on the classpath.
+ * In order to use this class, you must include <em>log4j</em> on the classpath.
  * <p>
  * SQL statements are logged at the {@code DEBUG} level.  Bound parameter values
  * are logged at the {@code TRACE} level.
  *
  * @author Carl Harris
  */
-public class Slf4jLogger implements JdbcLogger {
+public class Log4j2JdbcLogger implements JdbcLogger {
 
   private final Logger logger;
 
@@ -41,7 +39,7 @@ public class Slf4jLogger implements JdbcLogger {
    * Constructs a new instance.
    * @param logger the delegate logger
    */
-  public Slf4jLogger(Logger logger) {
+  public Log4j2JdbcLogger(Logger logger) {
     this.logger = logger;
   }
 

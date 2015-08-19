@@ -18,45 +18,46 @@
  */
 package org.soulwing.jdbc.logger;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import org.apache.commons.logging.Log;
 import org.soulwing.jdbc.Parameter;
 
 /**
- * A {@link JdbcLogger} that delegates to {@link java.util.logging.Logger}.
+ * A {@link JdbcLogger} that delegates to a Commons Logging logger.
  * <p>
- * SQL statement are logged at the {@code FINE} level.  Bound parameter values
- * are logged at the {@code FINEST} level.
+ * In order to use this class, <em>commons-logging</em> must be on your class
+ * path.
+ * <p>
+ * SQL statements are logged at the {@code debug} level.  Bound parameter values
+ * are logged at the {@code trace} level.
  *
  * @author Carl Harris
  */
-public class JuliLogger implements JdbcLogger {
+public class JclJdbcLogger implements JdbcLogger {
 
-  private final Logger logger;
+  private final Log logger;
 
   /**
    * Constructs a new instance.
    * @param logger the delegate logger
    */
-  public JuliLogger(Logger logger) {
+  public JclJdbcLogger(Log logger) {
     this.logger = logger;
   }
 
   @Override
   public void writeStatement(String sql) {
-    if (logger.isLoggable(Level.FINE)) {
-      logger.fine(sql);
+    if (logger.isDebugEnabled()) {
+      logger.debug(sql);
     }
   }
 
   @Override
   public void writeParameters(Parameter[] parameters) {
-    if (logger.isLoggable(Level.FINEST)) {
+    if (logger.isTraceEnabled()) {
       for (int index = 0, max = parameters.length; index < max; index++) {
-        logger.finest(parameters[index].toString(index));
+        logger.trace(parameters[index].toString(index));
       }
     }
   }
-  
+
 }

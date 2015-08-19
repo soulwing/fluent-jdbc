@@ -18,46 +18,26 @@
  */
 package org.soulwing.jdbc.logger;
 
-import org.apache.commons.logging.Log;
 import org.soulwing.jdbc.Parameter;
 
 /**
- * A {@link JdbcLogger} that delegates to a Commons Logging logger.
- * <p>
- * In order to use this class, <em>commons-logging</em> must be on your class
- * path.
- * <p>
- * SQL statements are logged at the {@code debug} level.  Bound parameter values
- * are logged at the {@code trace} level.
+ * A singleton {@link JdbcLogger} that does nothing.
  *
  * @author Carl Harris
  */
-public class JclLogger implements JdbcLogger {
+public class NullJdbcLogger implements JdbcLogger {
 
-  private final Log logger;
+  public static final NullJdbcLogger INSTANCE = new NullJdbcLogger();
 
-  /**
-   * Constructs a new instance.
-   * @param logger the delegate logger
-   */
-  public JclLogger(Log logger) {
-    this.logger = logger;
+  private NullJdbcLogger() {
   }
 
   @Override
   public void writeStatement(String sql) {
-    if (logger.isDebugEnabled()) {
-      logger.debug(sql);
-    }
   }
 
   @Override
   public void writeParameters(Parameter[] parameters) {
-    if (logger.isTraceEnabled()) {
-      for (int index = 0, max = parameters.length; index < max; index++) {
-        logger.trace(parameters[index].toString(index));
-      }
-    }
   }
 
 }

@@ -18,26 +18,47 @@
  */
 package org.soulwing.jdbc.logger;
 
+import org.slf4j.Logger;
 import org.soulwing.jdbc.Parameter;
+import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
- * A singleton {@link JdbcLogger} that does nothing.
+ * A {@link JdbcLogger} that delegates to an
+ * <a href="http://slf4j.org">slf4j</a> {@code Logger}.
+ * <p>
+ * In order to use this class, you must include <em>slf4j</em> on the classpath.
+ * <p>
+ * SQL statements are logged at the {@code DEBUG} level.  Bound parameter values
+ * are logged at the {@code TRACE} level.
  *
  * @author Carl Harris
  */
-public class NullLogger implements JdbcLogger {
+public class Slf4jJdbcLogger implements JdbcLogger {
 
-  public static final NullLogger INSTANCE = new NullLogger();
+  private final Logger logger;
 
-  private NullLogger() {
+  /**
+   * Constructs a new instance.
+   * @param logger the delegate logger
+   */
+  public Slf4jJdbcLogger(Logger logger) {
+    this.logger = logger;
   }
 
   @Override
   public void writeStatement(String sql) {
+    if (logger.isDebugEnabled()) {
+      logger.debug(sql);
+    }
   }
 
   @Override
   public void writeParameters(Parameter[] parameters) {
+    if (logger.isTraceEnabled()) {
+      for (int index = 0, max = parameters.length; index < max; index++) {
+        logger.trace(parameters[index].toString(index));
+      }
+    }
   }
 
 }

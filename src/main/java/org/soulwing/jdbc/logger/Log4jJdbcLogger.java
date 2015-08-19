@@ -18,11 +18,11 @@
  */
 package org.soulwing.jdbc.logger;
 
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.soulwing.jdbc.Parameter;
 
 /**
- * A {@link JdbcLogger} that delegates to a Log4j 2 {@code Logger}.
+ * A {@link JdbcLogger} that delegates to a Log4j {@code Logger}.
  * <p>
  * In order to use this class, you must include <em>log4j</em> on the classpath.
  * <p>
@@ -31,7 +31,7 @@ import org.soulwing.jdbc.Parameter;
  *
  * @author Carl Harris
  */
-public class Log4j2Logger implements JdbcLogger {
+public class Log4jJdbcLogger implements JdbcLogger {
 
   private final Logger logger;
 
@@ -39,7 +39,7 @@ public class Log4j2Logger implements JdbcLogger {
    * Constructs a new instance.
    * @param logger the delegate logger
    */
-  public Log4j2Logger(Logger logger) {
+  public Log4jJdbcLogger(Logger logger) {
     this.logger = logger;
   }
 

@@ -28,7 +28,7 @@ import org.soulwing.jdbc.Parameter;
  *
  * @author Carl Harris
  */
-public class PrintWriterLogger implements JdbcLogger {
+public class PrintWriterJdbcLogger implements JdbcLogger {
 
   private final PrintWriter delegate;
   private final boolean traceEnabled;
@@ -36,10 +36,26 @@ public class PrintWriterLogger implements JdbcLogger {
   /**
    * Constructs a new instance.
    * @param delegate delegate print writer
+   */
+  public PrintWriterJdbcLogger(PrintWriter delegate) {
+    this(delegate, false);
+  }
+
+  /**
+   * Constructs a new instance.
+   * @param delegate delegate print stream
+   */
+  public PrintWriterJdbcLogger(PrintStream delegate) {
+    this(delegate, false);
+  }
+
+  /**
+   * Constructs a new instance.
+   * @param delegate delegate print writer
    * @param traceEnabled flag indicating whether trace level logging should
    *    be used
    */
-  public PrintWriterLogger(PrintWriter delegate, boolean traceEnabled) {
+  public PrintWriterJdbcLogger(PrintWriter delegate, boolean traceEnabled) {
     this.delegate = delegate;
     this.traceEnabled = traceEnabled;
   }
@@ -50,7 +66,7 @@ public class PrintWriterLogger implements JdbcLogger {
    * @param traceEnabled flag indicating whether trace level logging should
    *    be used
    */
-  public PrintWriterLogger(PrintStream delegate, boolean traceEnabled) {
+  public PrintWriterJdbcLogger(PrintStream delegate, boolean traceEnabled) {
     this(new PrintWriter(delegate), traceEnabled);
   }
 

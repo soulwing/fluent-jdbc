@@ -27,8 +27,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.soulwing.jdbc.logger.JdbcLogger;
-import org.soulwing.jdbc.logger.NullLogger;
-import org.soulwing.jdbc.logger.PrintWriterLogger;
+import org.soulwing.jdbc.logger.NullJdbcLogger;
+import org.soulwing.jdbc.logger.PrintWriterJdbcLogger;
 import org.soulwing.jdbc.source.SQLSource;
 
 /**
@@ -53,7 +53,7 @@ import org.soulwing.jdbc.source.SQLSource;
 public class FluentJdbc implements JdbcOperations {
 
   private final DataSource dataSource;
-  private JdbcLogger logger = NullLogger.INSTANCE;
+  private JdbcLogger logger = NullJdbcLogger.INSTANCE;
 
   /**
    * Constructs a new instance.
@@ -213,7 +213,7 @@ public class FluentJdbc implements JdbcOperations {
    */
   public void setLogger(JdbcLogger logger) {
     if (logger == null) {
-      logger = NullLogger.INSTANCE;
+      logger = NullJdbcLogger.INSTANCE;
     }
     this.logger = logger;
   }
@@ -233,7 +233,7 @@ public class FluentJdbc implements JdbcOperations {
    *    be used
    */
   public void setLogger(PrintWriter writer, boolean traceEnabled) {
-    setLogger(new PrintWriterLogger(writer, traceEnabled));
+    setLogger(new PrintWriterJdbcLogger(writer, traceEnabled));
   }
 
   /**
@@ -252,7 +252,7 @@ public class FluentJdbc implements JdbcOperations {
    *
    */
   public void setLogger(PrintStream stream, boolean traceEnabled) {
-    setLogger(new PrintWriterLogger(stream, traceEnabled));
+    setLogger(new PrintWriterJdbcLogger(stream, traceEnabled));
   }
 
 }

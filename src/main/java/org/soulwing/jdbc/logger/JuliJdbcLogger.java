@@ -1,5 +1,5 @@
 /*
- * File created on Aug 19, 2015
+ * File created on Aug 18, 2015
  *
  * Copyright (c) 2015 Carl Harris, Jr
  * and others as noted
@@ -18,20 +18,20 @@
  */
 package org.soulwing.jdbc.logger;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.soulwing.jdbc.Parameter;
 
 /**
- * A {@link JdbcLogger} that delegates to a Log4j {@code Logger}.
+ * A {@link JdbcLogger} that delegates to {@link java.util.logging.Logger}.
  * <p>
- * In order to use this class, you must include <em>log4j</em> on the classpath.
- * <p>
- * SQL statements are logged at the {@code DEBUG} level.  Bound parameter values
- * are logged at the {@code TRACE} level.
+ * SQL statement are logged at the {@code FINE} level.  Bound parameter values
+ * are logged at the {@code FINEST} level.
  *
  * @author Carl Harris
  */
-public class Log4jLogger implements JdbcLogger {
+public class JuliJdbcLogger implements JdbcLogger {
 
   private final Logger logger;
 
@@ -39,24 +39,24 @@ public class Log4jLogger implements JdbcLogger {
    * Constructs a new instance.
    * @param logger the delegate logger
    */
-  public Log4jLogger(Logger logger) {
+  public JuliJdbcLogger(Logger logger) {
     this.logger = logger;
   }
 
   @Override
   public void writeStatement(String sql) {
-    if (logger.isDebugEnabled()) {
-      logger.debug(sql);
+    if (logger.isLoggable(Level.FINE)) {
+      logger.fine(sql);
     }
   }
 
   @Override
   public void writeParameters(Parameter[] parameters) {
-    if (logger.isTraceEnabled()) {
+    if (logger.isLoggable(Level.FINEST)) {
       for (int index = 0, max = parameters.length; index < max; index++) {
-        logger.trace(parameters[index].toString(index));
+        logger.finest(parameters[index].toString(index));
       }
     }
   }
-
+  
 }

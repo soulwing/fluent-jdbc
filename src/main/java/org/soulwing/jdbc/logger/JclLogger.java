@@ -55,12 +55,7 @@ public class JclLogger implements JdbcLogger {
   public void writeParameters(Parameter[] parameters) {
     if (logger.isTraceEnabled()) {
       for (int index = 0, max = parameters.length; index < max; index++) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("parameter[");
-        sb.append(index);
-        sb.append("]: ");
-        sb.append(parameters[index]);
-        logger.trace(sb.toString());
+        logger.trace(parameters[index].toString(index));
       }
     }
   }

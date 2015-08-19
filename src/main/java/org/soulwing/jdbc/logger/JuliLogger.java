@@ -54,12 +54,7 @@ public class JuliLogger implements JdbcLogger {
   public void writeParameters(Parameter[] parameters) {
     if (logger.isLoggable(Level.FINEST)) {
       for (int index = 0, max = parameters.length; index < max; index++) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("parameter[");
-        sb.append(index);
-        sb.append("]: ");
-        sb.append(parameters[index]);
-        logger.finest(sb.toString());
+        logger.finest(parameters[index].toString(index));
       }
     }
   }

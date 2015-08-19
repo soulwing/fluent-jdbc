@@ -24,7 +24,7 @@ import org.soulwing.jdbc.logger.JdbcLogger;
 
 /**
  * A {@link JdbcLogger} that delegates to an
- * <a href="http://slf4j.org>slf4j</a> {@code Logger}.
+ * <a href="http://slf4j.org">slf4j</a> {@code Logger}.
  * <p>
  * In order to use this class, you must include <em>slf4j</em> on the classpath.
  * <p>
@@ -56,12 +56,7 @@ public class Slf4jLogger implements JdbcLogger {
   public void writeParameters(Parameter[] parameters) {
     if (logger.isTraceEnabled()) {
       for (int index = 0, max = parameters.length; index < max; index++) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("parameter[");
-        sb.append(index);
-        sb.append("]: ");
-        sb.append(parameters[index]);
-        logger.trace(sb.toString());
+        logger.trace(parameters[index].toString(index));
       }
     }
   }

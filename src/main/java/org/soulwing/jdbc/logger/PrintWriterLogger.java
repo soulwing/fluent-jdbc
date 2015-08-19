@@ -64,15 +64,9 @@ public class PrintWriterLogger implements JdbcLogger {
   public void writeParameters(Parameter[] parameters) {
     if (!traceEnabled) return;
     for (int index = 0, max = parameters.length; index < max; index++) {
-      StringBuilder sb = new StringBuilder();
-      sb.append("parameter[");
-      sb.append(index);
-      sb.append("]: ");
-      sb.append(parameters[index]);
-      delegate.println(sb.toString());
+      delegate.println(parameters[index].toString(index));
       delegate.flush();
     }
   }
-
 
 }

@@ -222,6 +222,21 @@ public class Parameter {
     return sb.toString();
   }
 
+  /**
+   * Produces a string representation of this parameter prefixed with a given
+   * index indicating its position in a parameter list.
+   * @param index the index value to include in the representation
+   * @return parameter description
+   */
+  public String toString(int index) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("parameter[");
+    sb.append(index);
+    sb.append("]: ");
+    sb.append(toString());
+    return sb.toString();
+  }
+
   private static String typeToString(int type) {
     for (Field field : typeFields) {
       try {

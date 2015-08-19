@@ -642,7 +642,32 @@ In addition to logging to `System.out` you can also configure Fluent JDBC
 to use any implementation of its `JdbcLogger` interface.  This is a 
 very simple simple adapter interface that can easily be implemented to work
 with almost any logging framework.  What's more, Fluent JDBC includes support for 
-many popular frameworks, including *Slf4j*, *Commons Logging*, and 
-*java.util.Logging (JULI)*. See the [Javadocs]
+many popular frameworks, including *Slf4j*, *Log4j*, *Commons Logging*, and 
+*java.util.Logging (JULI)*.
+
+Especially when using a logging framework, you may wish to format SQL statements
+prior to logging them.  Fluent JDBC includes a `FormattingJdbcLogger` that you
+can use to stack formatting on top of any `JdbcLogger`.  Formatters implement
+the `SQLFormatter` interface.  A very simple, single-line formatter that cleans
+up whitespace and removes SQL comments is also included (`SimpleSQLFormatter`).
+
+For example, suppose we wanted to log single-line formatted SQL to a 
+`java.util.logging.Logger`.  The following configuration is all we need.
+
+```
+import java.util.logging.Logger;
+
+import org.soulwing.jdbc.FluentJdbc;
+import org.soulwing.jdbc.logger.FormattingJdbcLogger;
+import org.soulwing.jdbc.logger.JuliJdbcLogger;
+import org.soulwing.jdbc.source.SimpleSQLFormatter;
+
+Logger logger = ...
+
+FluentJdbc jdbc = new FluentJdbc(...);
+jdbc.setLogger(new FormattingJdbcLogger(new JuliJbdcLogger(logger)));
+```
+
+See the [Javadocs]
 (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/org/soulwing/jdbc/logger/JdbcLogger.html)
-for complete details.
+for complete details on logging and formatting.

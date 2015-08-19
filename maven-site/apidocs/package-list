@@ -1,2 +1,3 @@
 org.soulwing.jdbc
+org.soulwing.jdbc.logger
 org.soulwing.jdbc.source

@@ -30,13 +30,13 @@
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.hamcrest.Matchers.is;
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.sql.CallableStatement;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.List;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.jmock.Expectations;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.jmock.auto.Mock;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.jmock.integration.junit4.JUnitRuleMockery;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.junit.Rule;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.jmock.Expectations;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.jmock.auto.Mock;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.jmock.integration.junit4.JUnitRuleMockery;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.junit.Rule;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.logger.JdbcLogger;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * Unit tests for {@link PreparedQueryExecutor}.</em>
@@ -53,28 +53,33 @@
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>    @Mock
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>    <strong class="jxr_keyword">private</strong> CallableStatement statement;
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>    @Override
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>    <strong class="jxr_keyword">protected</strong> AbstractPreparedStatementExecutor&lt;Boolean, CallableStatement&gt; newExecutor(
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>        PreparedStatementCreator&lt;CallableStatement&gt; psc, List&lt;Parameter&gt; parameters) {
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> CallableStatementExecutor(psc, parameters);
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>    }
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>    @Override
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>    <strong class="jxr_keyword">protected</strong> Expectations doExecuteExpectations() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Expectations() {
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>        {
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>          oneOf(statement).execute();
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>          will(returnValue(<strong class="jxr_keyword">true</strong>));
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>        }
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>      };
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>    }
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>    @Test
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testExecute() <strong class="jxr_keyword">throws</strong> Exception {
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>      assertThat(validateExecute(context, statement), is(<strong class="jxr_keyword">true</strong>));
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>    @Mock
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>    <strong class="jxr_keyword">private</strong> JdbcLogger logger;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>    @Override
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>    <strong class="jxr_keyword">protected</strong> AbstractPreparedStatementExecutor&lt;Boolean, CallableStatement&gt; newExecutor(
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>        PreparedStatementCreator&lt;CallableStatement&gt; psc, Parameter[] parameters) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> CallableStatementExecutor(psc, parameters, logger);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>    }
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>    @Override
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>    <strong class="jxr_keyword">protected</strong> Expectations doExecuteExpectations() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Expectations() {
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>        {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          oneOf(logger).writeStatement(SQL);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          oneOf(logger).writeParameters(with(any(Parameter[].<strong class="jxr_keyword">class</strong>)));
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          oneOf(statement).execute();
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>          will(returnValue(<strong class="jxr_keyword">true</strong>));
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>        }
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      };
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>    }
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  }
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>    @Test
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testExecute() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      assertThat(validateExecute(context, statement), is(<strong class="jxr_keyword">true</strong>));
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>    }
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 Carl Harris, Jr. All rights reserved.</div>

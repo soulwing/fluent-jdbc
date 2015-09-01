@@ -27,7 +27,7 @@ situation you can instead write code like this:
 
 ```
 List<Person> results = jdbc.queryForType(Person.class)
-    .using("SELECT * FROM person where name like ?")
+    .using("SELECT * FROM person WHERE name LIKE ?")
     .mappingRowsWith(new PersonMapper())
     .retrieveList(Parameter.with("%Nadine%"));
 ```

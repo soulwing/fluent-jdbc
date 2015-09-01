@@ -230,22 +230,37 @@
 <a class="jxr_linenumber" name="L222" href="#L222">222</a>     <strong class="jxr_keyword">return</strong> sb.toString();
 <a class="jxr_linenumber" name="L223" href="#L223">223</a>   }
 <a class="jxr_linenumber" name="L224" href="#L224">224</a> 
-<a class="jxr_linenumber" name="L225" href="#L225">225</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String typeToString(<strong class="jxr_keyword">int</strong> type) {
-<a class="jxr_linenumber" name="L226" href="#L226">226</a>     <strong class="jxr_keyword">for</strong> (Field field : typeFields) {
-<a class="jxr_linenumber" name="L227" href="#L227">227</a>       <strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">int</strong> value = field.getInt(Types.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L229" href="#L229">229</a>         <strong class="jxr_keyword">if</strong> (value == type) {
-<a class="jxr_linenumber" name="L230" href="#L230">230</a>           <strong class="jxr_keyword">return</strong> field.getName();
-<a class="jxr_linenumber" name="L231" href="#L231">231</a>         }
-<a class="jxr_linenumber" name="L232" href="#L232">232</a>       }
-<a class="jxr_linenumber" name="L233" href="#L233">233</a>       <strong class="jxr_keyword">catch</strong> (IllegalAccessException ex) {
-<a class="jxr_linenumber" name="L234" href="#L234">234</a>         assert <strong class="jxr_keyword">true</strong>;   <em class="jxr_comment">// oh, well</em>
-<a class="jxr_linenumber" name="L235" href="#L235">235</a>       }
-<a class="jxr_linenumber" name="L236" href="#L236">236</a>     }
-<a class="jxr_linenumber" name="L237" href="#L237">237</a>     <strong class="jxr_keyword">return</strong> Integer.toString(type);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">   * Produces a string representation of this parameter prefixed with a given</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment">   * index indicating its position in a parameter list.</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment">   * @param index the index value to include in the representation</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">   * @return parameter description</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>   <strong class="jxr_keyword">public</strong> String toString(<strong class="jxr_keyword">int</strong> index) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>     StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>     sb.append(<span class="jxr_string">"parameter["</span>);
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>     sb.append(index);
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>     sb.append(<span class="jxr_string">"]: "</span>);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     sb.append(toString());
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>     <strong class="jxr_keyword">return</strong> sb.toString();
 <a class="jxr_linenumber" name="L238" href="#L238">238</a>   }
 <a class="jxr_linenumber" name="L239" href="#L239">239</a> 
-<a class="jxr_linenumber" name="L240" href="#L240">240</a> }
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String typeToString(<strong class="jxr_keyword">int</strong> type) {
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     <strong class="jxr_keyword">for</strong> (Field field : typeFields) {
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>         <strong class="jxr_keyword">int</strong> value = field.getInt(Types.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>         <strong class="jxr_keyword">if</strong> (value == type) {
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>           <strong class="jxr_keyword">return</strong> field.getName();
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         }
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>       }
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>       <strong class="jxr_keyword">catch</strong> (IllegalAccessException ex) {
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         assert <strong class="jxr_keyword">true</strong>;   <em class="jxr_comment">// oh, well</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>       }
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>     }
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     <strong class="jxr_keyword">return</strong> Integer.toString(type);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>   }
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 Carl Harris, Jr. All rights reserved.</div>

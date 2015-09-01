@@ -35,8 +35,8 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> javax.sql.DataSource;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.logger.JdbcLogger;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.logger.NullLogger;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.logger.PrintWriterLogger;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.logger.NullJdbcLogger;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.logger.PrintWriterJdbcLogger;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.soulwing.jdbc.source.SQLSource;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment">/**</em>
@@ -61,7 +61,7 @@
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../org/soulwing/jdbc/FluentJdbc.html">FluentJdbc</a> <strong class="jxr_keyword">implements</strong> <a href="../../../org/soulwing/jdbc/JdbcOperations.html">JdbcOperations</a> {
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> DataSource dataSource;
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>    <strong class="jxr_keyword">private</strong> <a href="../../../org/soulwing/jdbc/logger/JdbcLogger.html">JdbcLogger</a> logger = NullLogger.INSTANCE;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>    <strong class="jxr_keyword">private</strong> <a href="../../../org/soulwing/jdbc/logger/JdbcLogger.html">JdbcLogger</a> logger = NullJdbcLogger.INSTANCE;
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>    <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">   * Constructs a new instance.</em>
@@ -221,7 +221,7 @@
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_javadoccomment">   */</em>
 <a class="jxr_linenumber" name="L214" href="#L214">214</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setLogger(<a href="../../../org/soulwing/jdbc/logger/JdbcLogger.html">JdbcLogger</a> logger) {
 <a class="jxr_linenumber" name="L215" href="#L215">215</a>     <strong class="jxr_keyword">if</strong> (logger == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L216" href="#L216">216</a>       logger = NullLogger.INSTANCE;
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>       logger = NullJdbcLogger.INSTANCE;
 <a class="jxr_linenumber" name="L217" href="#L217">217</a>     }
 <a class="jxr_linenumber" name="L218" href="#L218">218</a>     <strong class="jxr_keyword">this</strong>.logger = logger;
 <a class="jxr_linenumber" name="L219" href="#L219">219</a>   }
@@ -241,7 +241,7 @@
 <a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">   *    be used</em>
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">   */</em>
 <a class="jxr_linenumber" name="L235" href="#L235">235</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setLogger(PrintWriter writer, <strong class="jxr_keyword">boolean</strong> traceEnabled) {
-<a class="jxr_linenumber" name="L236" href="#L236">236</a>     setLogger(<strong class="jxr_keyword">new</strong> <a href="../../../org/soulwing/jdbc/logger/PrintWriterLogger.html">PrintWriterLogger</a>(writer, traceEnabled));
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     setLogger(<strong class="jxr_keyword">new</strong> <a href="../../../org/soulwing/jdbc/logger/PrintWriterJdbcLogger.html">PrintWriterJdbcLogger</a>(writer, traceEnabled));
 <a class="jxr_linenumber" name="L237" href="#L237">237</a>   }
 <a class="jxr_linenumber" name="L238" href="#L238">238</a> 
 <a class="jxr_linenumber" name="L239" href="#L239">239</a>   <em class="jxr_javadoccomment">/**</em>
@@ -260,7 +260,7 @@
 <a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">   *</em>
 <a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">   */</em>
 <a class="jxr_linenumber" name="L254" href="#L254">254</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setLogger(PrintStream stream, <strong class="jxr_keyword">boolean</strong> traceEnabled) {
-<a class="jxr_linenumber" name="L255" href="#L255">255</a>     setLogger(<strong class="jxr_keyword">new</strong> <a href="../../../org/soulwing/jdbc/logger/PrintWriterLogger.html">PrintWriterLogger</a>(stream, traceEnabled));
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     setLogger(<strong class="jxr_keyword">new</strong> <a href="../../../org/soulwing/jdbc/logger/PrintWriterJdbcLogger.html">PrintWriterJdbcLogger</a>(stream, traceEnabled));
 <a class="jxr_linenumber" name="L256" href="#L256">256</a>   }
 <a class="jxr_linenumber" name="L257" href="#L257">257</a> 
 <a class="jxr_linenumber" name="L258" href="#L258">258</a> }

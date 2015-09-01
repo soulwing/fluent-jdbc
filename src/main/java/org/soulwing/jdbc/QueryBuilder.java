@@ -119,24 +119,25 @@ class QueryBuilder<T> implements JdbcQuery<T> {
   @Override
   @SuppressWarnings("unchecked")
   public List<T> retrieveList(Parameter... parameters) {
-    return (List<T>) retrieve(handler != null ? handler : new MultipleRowHandler<>(innerHandler), parameters
-    );
+    return (List<T>) retrieve(handler != null ?
+        handler : new MultipleRowHandler<>(innerHandler), parameters);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public T retrieveValue(Parameter... parameters) {
-    return (T) retrieve(handler != null ? handler : new SingleRowHandler<>(innerHandler), parameters
-    );
+    return (T) retrieve(handler != null ?
+        handler : new SingleRowHandler<>(innerHandler), parameters);
   }
 
   @Override
   public void execute(Parameter... parameters) {
-    retrieve(handler, parameters);
+    retrieve(handler != null ? handler : new MultipleRowHandler<>(innerHandler),
+        parameters);
   }
 
   /**
-   * Execute the query and retreive the result.
+   * Execute the query and retrieve the result.
    * <p>
    * If this builder is configured for repeated execution, the JDBC connection
    * and statement resources will remain open when this method returns.

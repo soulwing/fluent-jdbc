@@ -204,6 +204,29 @@ public class QueryBuilderTest {
   }
 
   @Test
+  public void testExecuteWithRowMapper() throws Exception {
+    context.checking(prepareStatementExpectations());
+    context.checking(executeStatementExpectations());
+    context.checking(closeExpectations());
+    context.checking(new Expectations() {
+      {
+        exactly(2).of(resultSet).next();
+        will(onConsecutiveCalls(returnValue(true), returnValue(false)));
+        oneOf(rowMapper).mapRow(resultSet, 1);
+        will(returnValue(RESULT));
+        oneOf(resultSet).close();
+      }
+    });
+
+    query.using(SQL).mappingRowsWith(rowMapper).execute();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testExecuteWithNoHandler() throws Exception {
+    query.using(SQL).execute();
+  }
+
+  @Test
   public void testRetrieveListWithRowMapper() throws Exception {
     context.checking(prepareStatementExpectations());
     context.checking(executeStatementExpectations());

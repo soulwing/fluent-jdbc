@@ -143,6 +143,9 @@ public class Parameter {
    */
   public void inject(int parameterIndex, PreparedStatement statement)
       throws SQLException {
+    if (statement instanceof CallableStatement && out) {
+      ((CallableStatement) statement).registerOutParameter(parameterIndex, type);
+    }
     if (!in) return;
     if (value == null) {
       statement.setNull(parameterIndex, Types.NULL);

@@ -331,7 +331,7 @@ Person person = jdbc.queryForType(Person.class)
 ```
 
 Often, you want to query and get a single column value.  The query builder's
-`extractColumn` method can be used to accomplish this easily:
+`extractingColumn` method can be used to accomplish this easily:
 
 ```
 int average = jdbc.queryForType(int.class)

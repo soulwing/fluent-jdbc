@@ -18,8 +18,6 @@
  */
 package org.soulwing.jdbc.logger;
 
-import java.io.IOException;
-
 import org.soulwing.jdbc.Parameter;
 
 /**

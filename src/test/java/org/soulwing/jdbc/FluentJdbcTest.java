@@ -36,6 +36,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.soulwing.jdbc.source.StringSQLSource;
 
@@ -273,6 +274,30 @@ public class FluentJdbcTest {
 
       call.execute(Parameter.in("baz"), Parameter.out(Types.VARCHAR));
       assertThat(call.getOutParameter(2, String.class), is(equalTo("baz")));
+    }
+    finally {
+      call.close();
+    }
+  }
+
+  @Test
+  @Ignore   // this test fails because of an implementation issue in HSQLDB
+            // see http://sourceforge.net/p/hsqldb/feature-requests/280
+  public void testCallFunction() throws Exception {
+    jdbc.execute(
+        "CREATE FUNCTION foo(IN name VARCHAR(255)) " +
+            "RETURNS VARCHAR(255) " +
+            "BEGIN ATOMIC " +
+            "RETURN 'Hello, ' || name; " +
+            "END");
+
+    JdbcCall call = jdbc.call("{? = call foo(?)}");
+    try {
+      call.execute(Parameter.out(Types.VARCHAR), Parameter.in("bar"));
+      assertThat(call.getOutParameter(1, String.class), is(equalTo("Hello, bar")));
+
+      call.execute(Parameter.out(Types.VARCHAR), Parameter.in("baz"));
+      assertThat(call.getOutParameter(1, String.class), is(equalTo("Hello, baz")));
     }
     finally {
       call.close();

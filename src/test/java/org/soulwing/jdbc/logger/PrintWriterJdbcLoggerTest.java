@@ -70,6 +70,8 @@ public class PrintWriterJdbcLoggerTest {
         oneOf(delegate).flush();
       }
     });
+
+    logger.writeStatement(SQL);
   }
 
   @Test

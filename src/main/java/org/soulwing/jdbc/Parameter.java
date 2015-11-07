@@ -148,27 +148,13 @@ public class Parameter {
     }
     if (!in) return;
     if (value == null) {
-      statement.setNull(parameterIndex, Types.NULL);
+      statement.setNull(parameterIndex, type);
     }
     else if (type == Types.NULL) {
       statement.setObject(parameterIndex, value);
     }
     else {
       statement.setObject(parameterIndex, value, type);
-    }
-  }
-
-  /**
-   * Injects this parameter into the given callable statement.
-   * @param parameterIndex index of the statement placeholder (starts at 1)
-   * @param statement target statement
-   * @throws SQLException
-   */
-  public void inject(int parameterIndex, CallableStatement statement)
-      throws SQLException {
-    inject(parameterIndex, (PreparedStatement) statement);
-    if (out) {
-      statement.registerOutParameter(parameterIndex, type);
     }
   }
 

@@ -81,7 +81,7 @@ public class Parameter {
   /**
    * Creates a new input parameter with the given value.
    * <p>
-   * Synonym for {@link #in(Object)}.
+   * Synonym for {@link #in(int, Object)}.
    *
    * @param type SQL type of the parameter
    * @param value value of the parameter
@@ -93,9 +93,6 @@ public class Parameter {
 
   /**
    * Creates a new input parameter with the given value.
-   * <p>
-   * Synonym for {@link #in(Object)}.
-   *
    * @param value value of the parameter
    * @return parameter object
    */

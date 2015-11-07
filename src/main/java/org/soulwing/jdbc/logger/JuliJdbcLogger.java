@@ -26,7 +26,7 @@ import org.soulwing.jdbc.Parameter;
 /**
  * A {@link JdbcLogger} that delegates to {@link java.util.logging.Logger}.
  * <p>
- * SQL statement are logged at the {@code FINE} level.  Bound parameter values
+ * SQL statements are logged at the {@code FINE} level.  Bound parameter values
  * are logged at the {@code FINEST} level.
  *
  * @author Carl Harris

@@ -38,6 +38,17 @@ application.
 Getting Started
 ===============
 
+Fluent JDBC is available from Maven Central, so you can make use of it in your
+project by simply including it as a dependency:
+
+```
+<dependency>
+  <groupId>org.soulwing.jdbc</groupId>
+  <artifactId>fluent-jdbc</artifactId>
+  <version>1.1.4</version>
+</dependency>
+```
+
 The `FluentJdbc` class provides the central API you use to perform SQL 
 operations.  See the [Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/)
 for full details of the API.  
@@ -50,7 +61,7 @@ can be used by any number of application components concurrently.
 import javax.sql.DataSource;
 import org.soulwing.jdbc.FluentJdbc;
 
-DataSource dataSource = ... // typically injected by the container
+DataSource dataSource = ... // typically injected by your container
 FluentJdbc jdbc = new FluentJdbc(dataSource);
 ```
 
@@ -472,7 +483,7 @@ Each passed `SQLSource` is used to read a single statement, and is then closed.
 Calling Stored Procedures
 =========================
 
-Stored procedures can be called using `call` method.  This method creates call
+Stored procedures can be called using `call` method.  This method creates a call
 object that can be executed using the `execute` method.  Zero or more parameters
 for the call can be specified as arguments to the execute method.  Each parameter
 can be specified as IN, OUT, or INOUT.
@@ -587,7 +598,7 @@ Fluent JDBC will not close this connection -- the creator of the connection is
 responsible for closing it.
 
 **NOTE**:  A `FluentJdbc` instance that is constructed using a `Connection`
-should not be shared with muliple concurrent threads, since most transaction 
+should not be shared with multiple concurrent threads, since most transaction 
 management mechanisms assume a connection-per-thread model.
 
 The following example shows how this works. The first couple of lines of code
@@ -640,9 +651,9 @@ jdbc.setLogger(System.out, true);
 
 In addition to logging to `System.out` you can also configure Fluent JDBC
 to use any implementation of its `JdbcLogger` interface.  This is a 
-very simple simple adapter interface that can easily be implemented to work
-with almost any logging framework.  What's more, Fluent JDBC includes support for 
-many popular frameworks, including *Slf4j*, *Log4j*, *Commons Logging*, and 
+very simple adapter interface that can easily be implemented to work with almost 
+any logging framework.  What's more, Fluent JDBC includes support for many 
+popular frameworks, including *Slf4j*, *Log4j*, *Commons Logging*, and 
 *java.util.Logging (JULI)*.
 
 Especially when using a logging framework, you may wish to format SQL statements

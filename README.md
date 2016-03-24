@@ -4,12 +4,8 @@ Fluent JDBC
 [![Build Status](https://travis-ci.org/soulwing/fluent-jdbc.svg?branch=master)](https://travis-ci.org/soulwing/fluent-jdbc)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.soulwing.jdbc/fluent-jdbc/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aorg.soulwing.jdbc%20a%3Afluent-jdbc*)
 
-Fluent JDBC is a lightweight façade for performing SQL using JDBC, inspired by
-Spring's `JdbcTemplate`.
-
-Spring's `JdbcTemplate` is great... if you're using the Spring framework. 
-However, if you're building apps based on Java EE 7, using `JdbcTemplate`
-brings in an awful lot of Spring machinery that you don't really need.
+Fluent JDBC is a lightweight façade for performing SQL using JDBC with a
+fluent API based on the Builder and Command Object patterns.
 
 This project focuses on the subset of JDBC features needed to perform tasks like 
 database migration (e.g. using [Flyway] (http://flywaydb.org)) and data loading. 
@@ -17,13 +13,14 @@ The assumption here is that you're going to be using JPA for most of your
 interaction with the database, but you need to do a little plain old SQL here 
 and there and want that to be as simple to do as possible.
 
-One of the less attractive aspects of Spring's `JdbcTemplate` is that it has
-*many* overloaded methods with different argument types, which makes it hard
-to understand and use.  Fluent JDBC has an operations API that uses the Builder 
-and Command design patterns to create a fluent language for specifying queries, 
-updates, and stored procedure calls. Instead of trying to figure out which of 
-the many overloads of the `query` method might be needed in a particular 
-situation you can instead write code like this:
+Fluent JDBC was inspired by Spring's `JdbcTemplate`. One of the less attractive 
+aspects of Spring's `JdbcTemplate` is that it has *many* overloaded methods with 
+different argument types, which makes it hard to understand and use.  Fluent JDBC 
+has an operations API that uses the Builder and Command Object design patterns to 
+create a fluent language for specifying queries, updates, and stored procedure 
+calls. Instead of trying to figure out which of the many overloads of the `query` 
+method might be needed in a particular situation you can instead write code like 
+this:
 
 ```
 List<Person> results = jdbc.queryForType(Person.class)
@@ -497,7 +494,7 @@ Because every call object supports repeated execution, you **must** close a call
 object when it is no longer needed, by either invoking the `close` method or by
 nesting the call object in a *try-with-resources* construct.
 
-The JDBC specification allows you the use of a vendor-independent syntax to
+The JDBC specification allows the use of a vendor-independent syntax to
 call stored procedures, in addition to whatever call syntax is supported by your
 JDBC driver vendor.  See the Javadocs for [CallableStatement] (http://docs.oracle.com/javase/7/docs/api/java/sql/CallableStatement.html) 
 for details.  For the sake of simplicity, the examples shown below use the 

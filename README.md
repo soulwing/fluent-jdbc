@@ -439,7 +439,7 @@ try (CSVReader reader = new CSVReader(csvFile);
     CSV csv = reader.next();
     updater.execute(
         Parameter.with(Long.valueOf(csv.get(0))),
-        Parameter.with(csv.get(2)), 
+        Parameter.with(csv.get(1)), 
         Parameter.with(Integer.valueOf(csv.get(2)));
   }  
 }

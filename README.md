@@ -327,7 +327,7 @@ Person person = jdbc.queryForType(Person.class)
           person.setAge(rs.getInt("age"));
           return person;
         }})
-    .retrieveList(Parameter.with(2)); 
+    .retrieveValue(Parameter.with(2)); 
 ```
 
 Often, you want to query and get a single column value.  The query builder's

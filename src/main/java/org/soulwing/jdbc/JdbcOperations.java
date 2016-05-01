@@ -48,20 +48,10 @@ public interface JdbcOperations {
 
   /**
    * Executes the sequence of SQL statements produced by the given source.
-   * <p>
-   * This method is a synonym for {@link #executeScript(SQLSource, boolean)}
-   * with the {@code ignoreErrors} parameter set to {@code false}.
    *
    * @param source source of the SQL statements to execute
    */
   void executeScript(SQLSource source);
-
-  /**
-   * Executes the sequence of SQL statements produced by the given source.
-   * @param source source of the SQL statements to execute
-   * @param ignoreErrors flag indicating whether errors should be ignored
-   */
-  void executeScript(SQLSource source, boolean ignoreErrors);
 
   /**
    * Creates a query operation.

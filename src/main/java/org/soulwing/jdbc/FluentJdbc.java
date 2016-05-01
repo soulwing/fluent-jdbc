@@ -54,6 +54,8 @@ public class FluentJdbc implements JdbcOperations {
 
   private final DataSource dataSource;
   private JdbcLogger logger = NullJdbcLogger.INSTANCE;
+  private boolean autoCommit;
+  private boolean ignoreErrors;
 
   /**
    * Constructs a new instance.
@@ -105,20 +107,14 @@ public class FluentJdbc implements JdbcOperations {
    */
   @Override
   public void executeScript(SQLSource source) {
-    executeScript(source, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void executeScript(SQLSource source, boolean ignoreErrors) {
     Connection connection = null;
     Boolean autoCommit = null;
     try {
       connection = dataSource.getConnection();
-      autoCommit = connection.getAutoCommit();
-      connection.setAutoCommit(true);
+      if (this.autoCommit) {
+        autoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(true);
+      }
       final SingleConnectionDataSource dataSource =
           new SingleConnectionDataSource(connection);
       String sql = source.next();
@@ -253,6 +249,58 @@ public class FluentJdbc implements JdbcOperations {
    */
   public void setLogger(PrintStream stream, boolean traceEnabled) {
     setLogger(new PrintWriterJdbcLogger(stream, traceEnabled));
+  }
+
+  /**
+   * Gets the {@code autoCommit} flag state.
+   * <p>
+   * @return {@code true} if {@link #executeScript(SQLSource) executeScript}
+   *   will use auto-commit mode
+   */
+  public boolean isAutoCommit() {
+    return autoCommit;
+  }
+
+  /**
+   * Sets the {@code autoCommit} flag.
+   * <p>
+   * This state of this flag is checked when {@link #executeScript(SQLSource)
+   * executeScript} is invoked. If {@code true}, all statements executed by
+   * the script will be auto-committed.
+   * <p>
+   * In a managed transaction environment (e.g. in a Java EE application)
+   * setting this flag to {@code true} may cause script execution to fail.
+   *
+   * @param autoCommit the auto-commit flag state to set
+   */
+  public void setAutoCommit(boolean autoCommit) {
+    this.autoCommit = autoCommit;
+  }
+
+  /**
+   * Gets the {@code ignoreErrors} flag state.
+   * @return {@code true} if {@link #executeScript(SQLSource) executeScript}
+   *   will ignore errors at the statement level
+   */
+  public boolean isIgnoreErrors() {
+    return ignoreErrors;
+  }
+
+  /**
+   * Sets the {@code ignoreErrors} flag.
+   * <p>
+   * This state of this flag is checked when {@link #executeScript(SQLSource)
+   * executeScript} is invoked. If {@code true}, errors thrown by the execution
+   * of any given statement will be ignored.
+   * <p>
+   * In general, ignoring errors is effective only when the
+   * {@linkplain #setAutoCommit(boolean) auto-commit} flag is also set to
+   * {@code true}.
+   *
+   * @param ignoreErrors the flag state to set
+   */
+  public void setIgnoreErrors(boolean ignoreErrors) {
+    this.ignoreErrors = ignoreErrors;
   }
 
 }

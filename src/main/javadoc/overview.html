@@ -17,13 +17,10 @@
   ~ limitations under the License.
   -->
 <body>
-A lightweight facade for performing SQL using JDBC, inspired by Spring's
-<code>JdbcTemplate</code>.
+Fluent JDBC is a lightweight façade for performing SQL using JDBC with a
+fluent API based on the Builder and Command Object patterns.
 <p>
-Spring's <code>JdbcTemplate</code> is great... if you're using the Spring
-framework. However, if you're building apps based on Java EE 7, using
-<code>JdbcTemplate</code> brings in an awful lot of Spring machinery that you
-don't really need.  This project focuses on the subset of JDBC features
+Fluent JDBC project focuses on the subset of JDBC features
 needed to perform tasks like database migration (e.g. using
 <a href="http://flywaydb.org">Flyway</a>) and data loading. The assumption here
 is that you're going to be using JPA for most of your interaction with the

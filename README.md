@@ -251,6 +251,36 @@ which is useful in schema drop-create scenarios.
 > in a future version. Meanwhile, you should use the `execute` method for
 > DDL statements that define stored procedures.
 
+#### Using Auto-Commit When Executing Scripts
+
+Prior to version 1.2.0, Fluent JDBC would execute scripts using auto-commit
+mode. In an managed transaction environment (such as in a Java EE application)
+this may cause errors.  Fluent JDBC version 1.2.0 and later provides an 
+auto-commit flag as a property of a `FluentJdbc` isntance, allowing the 
+developer to control auto-commit mode usage.
+
+If you wish to execute scripts in auto-commit mode, set the flag as follows:
+
+```
+FluentJdbc jdbc = new FluentJdbc(dataSource);
+jdbc.setAutoCommit(true);
+```
+
+#### Ignoring Errors During Script Execution
+
+Prior to version 1.2.0, Fluent JDBC provided an overload for the `executeScript`
+method that allowed an `ignoreErrors` flag to be set.  Fluent JDBC version 1.2.0
+and later now provides this as a property of a `FluentJdbc` instance.  To ignore
+errors during script execution, set the flag as follows:
+
+```
+FluentJdbc jdbc = new FluentJdbc(dataSource);
+jdbc.setIgnoreErrors(true);
+```
+
+Generally, ignoring errors is only effective when executing the script in 
+[auto-commit mode] (#using-auto-commit-when-executing-scripts).
+
 
 Performing Queries and Updates
 ==============================

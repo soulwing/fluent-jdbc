@@ -256,7 +256,7 @@ which is useful in schema drop-create scenarios.
 Prior to version 1.2.0, Fluent JDBC would execute scripts using auto-commit
 mode. In an managed transaction environment (such as in a Java EE application)
 this may cause errors.  Fluent JDBC version 1.2.0 and later provides an 
-auto-commit flag as a property of a `FluentJdbc` isntance, allowing the 
+auto-commit flag as a property of a `FluentJdbc` instance, allowing the 
 developer to control auto-commit mode usage.
 
 If you wish to execute scripts in auto-commit mode, set the flag as follows:

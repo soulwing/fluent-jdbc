@@ -67,7 +67,7 @@ public abstract class AbstractPreparedStatementExecutorTest
       }
     });
 
-    return newExecutor(psc, parameters).execute(dataSource);
+    return (T) newExecutor(psc, parameters).execute(dataSource);
   }
 
 }

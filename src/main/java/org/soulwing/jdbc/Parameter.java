@@ -20,7 +20,10 @@
 package org.soulwing.jdbc;
 
 import java.lang.reflect.Field;
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -144,7 +147,22 @@ public class Parameter {
       ((CallableStatement) statement).registerOutParameter(parameterIndex, type);
     }
     if (!in) return;
-    if (value == null) {
+    if (value instanceof BlobHandler) {
+      final Blob blob = statement.getConnection().createBlob();
+      ((BlobHandler) value).prepareBlob(blob);
+      statement.setBlob(parameterIndex, blob);
+    }
+    else if (value instanceof ClobHandler) {
+      final Clob clob = statement.getConnection().createClob();
+      ((ClobHandler) value).prepareClob(clob);
+      statement.setClob(parameterIndex, clob);
+    }
+    else if (value instanceof NClobHandler) {
+      final NClob nClob = statement.getConnection().createNClob();
+      ((NClobHandler) value).prepareNClob(nClob);
+      statement.setNClob(parameterIndex, nClob);
+    }
+    else if (value == null) {
       statement.setNull(parameterIndex, type);
     }
     else if (type == Types.NULL) {

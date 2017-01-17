@@ -18,13 +18,18 @@
  */
 package org.soulwing.jdbc;
 
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.Types;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -50,6 +55,27 @@ public class ParameterTest {
 
   @Mock
   private CallableStatement callableStatement;
+
+  @Mock
+  private BlobHandler blobHandler;
+
+  @Mock
+  private Blob blob;
+
+  @Mock
+  private ClobHandler clobHandler;
+
+  @Mock
+  private Clob clob;
+
+  @Mock
+  private NClobHandler nClobHandler;
+
+  @Mock
+  private NClob nClob;
+
+  @Mock
+  private Connection connection;
 
   @Test
   public void testInjectPreparedStatementValue() throws Exception {
@@ -96,6 +122,54 @@ public class ParameterTest {
   }
 
   @Test
+  public void testInjectPreparedStatementBlobAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(preparedStatement).getConnection();
+        will(returnValue(connection));
+        oneOf(connection).createBlob();
+        will(returnValue(blob));
+        oneOf(blobHandler).prepareBlob(blob);
+        oneOf(preparedStatement).setBlob(INDEX, blob);
+      }
+    });
+
+    Parameter.with(blobHandler).inject(INDEX, preparedStatement);
+  }
+
+  @Test
+  public void testInjectPreparedStatementClobAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(preparedStatement).getConnection();
+        will(returnValue(connection));
+        oneOf(connection).createClob();
+        will(returnValue(clob));
+        oneOf(clobHandler).prepareClob(clob);
+        oneOf(preparedStatement).setClob(INDEX, clob);
+      }
+    });
+
+    Parameter.with(clobHandler).inject(INDEX, preparedStatement);
+  }
+
+  @Test
+  public void testInjectPreparedStatementNClobAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(preparedStatement).getConnection();
+        will(returnValue(connection));
+        oneOf(connection).createNClob();
+        will(returnValue(nClob));
+        oneOf(nClobHandler).prepareNClob(nClob);
+        oneOf(preparedStatement).setNClob(INDEX, nClob);
+      }
+    });
+
+    Parameter.with(nClobHandler).inject(INDEX, preparedStatement);
+  }
+
+  @Test
   public void testInjectCallableStatementOutParameter() throws Exception {
     context.checking(new Expectations() {
       {
@@ -129,5 +203,55 @@ public class ParameterTest {
 
     Parameter.inout(TYPE, null).inject(INDEX, callableStatement);
   }
+
+  @Test
+  public void testInjectCallableStatementBlobAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(callableStatement).getConnection();
+        will(returnValue(connection));
+        oneOf(connection).createBlob();
+        will(returnValue(blob));
+        oneOf(blobHandler).prepareBlob(blob);
+        oneOf(callableStatement).setBlob(INDEX, blob);
+      }
+    });
+
+    Parameter.with(blobHandler).inject(INDEX, callableStatement);
+  }
+
+  @Test
+  public void testInjectCallableStatementClobAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(callableStatement).getConnection();
+        will(returnValue(connection));
+        oneOf(connection).createClob();
+        will(returnValue(clob));
+        oneOf(clobHandler).prepareClob(clob);
+        oneOf(callableStatement).setClob(INDEX, clob);
+      }
+    });
+
+    Parameter.with(clobHandler).inject(INDEX, callableStatement);
+  }
+
+  @Test
+  public void testInjectCallableStatementNClobAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(callableStatement).getConnection();
+        will(returnValue(connection));
+        oneOf(connection).createNClob();
+        will(returnValue(nClob));
+        oneOf(nClobHandler).prepareNClob(nClob);
+        oneOf(callableStatement).setNClob(INDEX, nClob);
+      }
+    });
+
+    Parameter.with(nClobHandler).inject(INDEX, callableStatement);
+  }
+
+
 
 }

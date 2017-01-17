@@ -22,8 +22,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -68,6 +71,15 @@ public class ResultSetAccessorTest {
 
   @Mock
   private ResultSet statement;
+
+  @Mock
+  private Blob blob;
+
+  @Mock
+  private Clob clob;
+
+  @Mock
+  private NClob nClob;
 
   private ResultSetAccessor accessor;
 
@@ -194,6 +206,42 @@ public class ResultSetAccessorTest {
     });
 
     assertThat(accessor.getTimestamp(LABEL), is(equalTo(TIMESTAMP)));
+  }
+
+  @Test
+  public void testGetBlobLabel() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(statement).getBlob(LABEL);
+        will(returnValue(blob));
+      }
+    });
+
+    assertThat(accessor.getBlob(LABEL), is(equalTo(blob)));
+  }
+
+  @Test
+  public void testGetClobLabel() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(statement).getClob(LABEL);
+        will(returnValue(clob));
+      }
+    });
+
+    assertThat(accessor.getClob(LABEL), is(equalTo(clob)));
+  }
+
+  @Test
+  public void testGetNClobLabel() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(statement).getNClob(LABEL);
+        will(returnValue(nClob));
+      }
+    });
+
+    assertThat(accessor.getNClob(LABEL), is(equalTo(nClob)));
   }
 
   @Test
@@ -326,6 +374,42 @@ public class ResultSetAccessorTest {
     });
 
     assertThat(accessor.getTimestamp(INDEX), is(equalTo(TIMESTAMP)));
+  }
+
+  @Test
+  public void testGetBlobIndex() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(statement).getBlob(INDEX);
+        will(returnValue(blob));
+      }
+    });
+
+    assertThat(accessor.getBlob(INDEX), is(equalTo(blob)));
+  }
+
+  @Test
+  public void testGetClobIndex() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(statement).getClob(INDEX);
+        will(returnValue(clob));
+      }
+    });
+
+    assertThat(accessor.getClob(INDEX), is(equalTo(clob)));
+  }
+
+  @Test
+  public void testGetNClobIndex() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(statement).getNClob(INDEX);
+        will(returnValue(nClob));
+      }
+    });
+
+    assertThat(accessor.getNClob(INDEX), is(equalTo(nClob)));
   }
 
   @Test

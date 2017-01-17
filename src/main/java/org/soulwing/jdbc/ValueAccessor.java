@@ -18,14 +18,17 @@
  */
 package org.soulwing.jdbc;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
 /**
  * An object that provides methods for accessing a data value in a JDBC
- * object such as a {@link ResultSet}.
+ * object such as a {@link java.sql.ResultSet}.
  *
  * @author Carl Harris
  */
@@ -64,6 +67,15 @@ abstract class ValueAccessor {
     if (Time.class.isAssignableFrom(type)) {
       return (T) this.getTime(index);
     }
+    if (Blob.class.isAssignableFrom(type)) {
+      return (T) this.getBlob(index);
+    }
+    if (Clob.class.isAssignableFrom(type)) {
+      return (T) this.getClob(index);
+    }
+    if (NClob.class.isAssignableFrom(type)) {
+      return (T) this.getNClob(index);
+    }
     return (T) this.getObject(index, type);
   }
 
@@ -99,6 +111,15 @@ abstract class ValueAccessor {
     }
     if (Time.class.isAssignableFrom(type)) {
       return (T) this.getTime(label);
+    }
+    if (Blob.class.isAssignableFrom(type)) {
+      return (T) this.getBlob(label);
+    }
+    if (Clob.class.isAssignableFrom(type)) {
+      return (T) this.getClob(label);
+    }
+    if (NClob.class.isAssignableFrom(type)) {
+      return (T) this.getNClob(label);
     }
     return (T) this.getObject(label, type);
   }
@@ -147,6 +168,18 @@ abstract class ValueAccessor {
   abstract Time getTime(String label) throws SQLException;
 
   abstract Time getTime(int index) throws SQLException;
+
+  abstract Blob getBlob(int index) throws SQLException;
+
+  abstract Blob getBlob(String label) throws SQLException;
+
+  abstract Clob getClob(int index) throws SQLException;
+
+  abstract Clob getClob(String label) throws SQLException;
+
+  abstract NClob getNClob(int index) throws SQLException;
+
+  abstract NClob getNClob(String label) throws SQLException;
 
   abstract Object getObject(String label, Class<?> type) throws SQLException;
 

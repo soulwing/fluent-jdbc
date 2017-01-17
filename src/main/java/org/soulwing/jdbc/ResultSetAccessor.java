@@ -18,7 +18,10 @@
  */
 package org.soulwing.jdbc;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -96,6 +99,21 @@ class ResultSetAccessor extends ValueAccessor {
   }
 
   @Override
+  public Blob getBlob(int columnIndex) throws SQLException {
+    return delegate.getBlob(columnIndex);
+  }
+
+  @Override
+  public Clob getClob(int columnIndex) throws SQLException {
+    return delegate.getClob(columnIndex);
+  }
+
+  @Override
+  public NClob getNClob(int columnIndex) throws SQLException {
+    return delegate.getNClob(columnIndex);
+  }
+
+  @Override
   public Object getObject(String label, Class<?> type) throws SQLException {
     return delegate.getObject(label, type);
   }
@@ -153,6 +171,21 @@ class ResultSetAccessor extends ValueAccessor {
   @Override
   public Timestamp getTimestamp(String columnLabel) throws SQLException {
     return delegate.getTimestamp(columnLabel);
+  }
+
+  @Override
+  public Blob getBlob(String columnLabel) throws SQLException {
+    return delegate.getBlob(columnLabel);
+  }
+
+  @Override
+  public Clob getClob(String columnLabel) throws SQLException {
+    return delegate.getClob(columnLabel);
+  }
+
+  @Override
+  public NClob getNClob(String columnLabel) throws SQLException {
+    return delegate.getNClob(columnLabel);
   }
 
   @Override

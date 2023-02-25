@@ -44,7 +44,7 @@ Documentation
 
 There are two main resources for learning and using Fluent JDBC
 
-* [Fluent JDBC Wiki] (https://github.com/soulwing/fluent-jdbc/wiki)
-* [API Javadocs] (http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/)
+* [Fluent JDBC Wiki](https://github.com/soulwing/fluent-jdbc/wiki)
+* [API Javadocs](http://soulwing.github.io/fluent-jdbc/maven-site/apidocs/)
   
 

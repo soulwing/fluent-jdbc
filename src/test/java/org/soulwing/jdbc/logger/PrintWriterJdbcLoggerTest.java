@@ -18,12 +18,18 @@
  */
 package org.soulwing.jdbc.logger;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,15 +53,14 @@ public class PrintWriterJdbcLoggerTest {
   public final JUnitRuleMockery context = new JUnitRuleClassImposterizingMockery();
 
   @Mock
-  private PrintWriter delegate;
-
-  @Mock
   private Parameter parameter0;
 
   @Mock
   private Parameter parameter1;
 
   private PrintWriterJdbcLogger logger;
+
+  private MockPrintWriter delegate = new MockPrintWriter();
 
   @Before
   public void setUp() throws Exception {
@@ -64,14 +69,9 @@ public class PrintWriterJdbcLoggerTest {
 
   @Test
   public void testWriteStatement() throws Exception {
-    context.checking(new Expectations() {
-      {
-        oneOf(delegate).println(SQL);
-        oneOf(delegate).flush();
-      }
-    });
-
     logger.writeStatement(SQL);
+    assertThat(delegate.lines.size(), is(equalTo(1)));
+    assertThat(delegate.lines.get(0), is(equalTo(SQL)));
   }
 
   @Test
@@ -80,15 +80,36 @@ public class PrintWriterJdbcLoggerTest {
       {
         oneOf(parameter0).toString(0);
         will(returnValue(PARAMETER_TEXT_0));
-        oneOf(delegate).println(PARAMETER_TEXT_0);
         oneOf(parameter1).toString(1);
         will(returnValue(PARAMETER_TEXT_1));
-        oneOf(delegate).println(PARAMETER_TEXT_1);
-        exactly(2).of(delegate).flush();
       }
     });
 
     logger.writeParameters(new Parameter[] { parameter0, parameter1 });
+    assertThat(delegate.lines.size(), is(equalTo(2)));
+    assertThat(delegate.lines.get(0), is(equalTo(PARAMETER_TEXT_0)));
+    assertThat(delegate.lines.get(1), is(equalTo(PARAMETER_TEXT_1)));
+    assertThat(delegate.flushCount, is(equalTo(2)));
+  }
+
+  static class MockPrintWriter extends PrintWriter {
+
+    List<String> lines = new ArrayList<>();
+    int flushCount;
+
+    public MockPrintWriter() {
+      super(new StringWriter());
+    }
+
+    @Override
+    public void println(String x) {
+      lines.add(x);
+    }
+
+    @Override
+    public void flush() {
+      flushCount++;
+    }
   }
 
 }

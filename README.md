@@ -34,7 +34,7 @@ application.
 Binary Distribution
 ===================
 
-Fluent JDBC is available from [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.soulwing.jdbc%22%20a%3A%22fluent-jdbc%22).
+Fluent JDBC is available from [Maven Central](https://central.sonatype.com/artifact/org.soulwing.jdbc/fluent-jdbc).
 You can use Fluent JDBC by simply setting up your build system (Maven, Gradle, 
 Ivy, etc) to include it as a dependency.
  

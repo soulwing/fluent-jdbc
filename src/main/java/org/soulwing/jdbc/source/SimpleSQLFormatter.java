@@ -36,7 +36,7 @@ public class SimpleSQLFormatter implements SQLFormatter {
   public String format(String sql) {
     try {
       final SimpleErrorReporter errorReporter = new SimpleErrorReporter();
-      final List<Token> tokens = Scanner.INSTANCE.scanTokens(
+      final List<Token> tokens = DefaultScanner.INSTANCE.scanTokens(
           new DelegatingSourceReader(new StringReader(sql.trim())), errorReporter);
       if (errorReporter.hasError()) {
         // we don't recognize the lexical structure, so don't bother formatting

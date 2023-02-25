@@ -115,5 +115,11 @@
       <version>2.7.1</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.6.jre7</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

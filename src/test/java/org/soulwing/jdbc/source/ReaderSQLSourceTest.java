@@ -28,8 +28,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URL;
 
+import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -38,6 +41,57 @@ import org.junit.Test;
  * @author Carl Harris
  */
 public class ReaderSQLSourceTest {
+
+  @Rule
+  public final JUnitRuleMockery context = new JUnitRuleMockery();
+
+  @Test
+  public void testBeginTransaction() throws Exception {
+    final String input = "BEGIN TRANSACTION";
+    validateInput(input);
+  }
+
+  @Test
+  public void testBlock() throws Exception {
+    final String input = "BEGIN something END";
+    validateInput(input);
+  }
+
+  @Test
+  public void testBlockWithNestedBlock() throws Exception {
+    final String input = "BEGIN something BEGIN something else END END";
+    validateInput(input);
+  }
+
+  @Test
+  public void testBlockWithDeeplyNestedBlock() throws Exception {
+    final String input = "BEGIN BEGIN BEGIN BEGIN END END END END";
+    validateInput(input);
+  }
+
+  @Test
+  public void testBlockWithNestedEndIf() throws Exception {
+    final String input = "BEGIN END IF END";
+    validateInput(input);
+  }
+
+  @Test
+  public void testBlockWithNestedEndLoop() throws Exception {
+    final String input = "BEGIN END LOOP END";
+    validateInput(input);
+  }
+
+  @Test
+  public void testBlockWithNestedEndCase() throws Exception {
+    final String input = "BEGIN END CASE END";
+    validateInput(input);
+  }
+
+  private void validateInput(String input) {
+    final StringReader reader = new StringReader(input);
+    ReaderSQLSource source = new ReaderSQLSource(reader, DefaultScanner.INSTANCE);
+    assertThat(source.next(), is(equalTo(input)));
+  }
 
   @Test
   public void testReadUTF8Source() throws Exception {

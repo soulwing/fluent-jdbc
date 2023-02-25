@@ -33,7 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link Scanner}.
+ * Unit tests for {@link DefaultScanner}.
  *
  * @author Carl Harris
  */
@@ -47,7 +47,7 @@ public class ScannerTest {
 
   @Test
   public void testEmptyInput() throws Exception {
-    final List<Token> tokens = Scanner.INSTANCE.scanTokens(
+    final List<Token> tokens = DefaultScanner.INSTANCE.scanTokens(
         sourceReaderWith(""), errorReporter);
     assertThat(tokens.size(), is(equalTo(1)));
     assertThat(tokens.get(0).getType(), is(Token.Type.EOF));
@@ -112,7 +112,7 @@ public class ScannerTest {
         oneOf(errorReporter).error(0, 2, "unterminated string");
       }
     });
-    Scanner.INSTANCE.scanTokens(sourceReaderWith("'"), errorReporter);
+    DefaultScanner.INSTANCE.scanTokens(sourceReaderWith("'"), errorReporter);
   }
 
   @Test
@@ -151,11 +151,6 @@ public class ScannerTest {
   }
 
   @Test
-  public void testFOR() throws Exception {
-    validateInput("FOR", Token.Type.FOR);
-  }
-
-  @Test
   public void testIF() throws Exception {
     validateInput("IF", Token.Type.IF);
   }
@@ -163,11 +158,6 @@ public class ScannerTest {
   @Test
   public void testLOOP() throws Exception {
     validateInput("LOOP", Token.Type.LOOP);
-  }
-
-  @Test
-  public void testWHILE() throws Exception {
-    validateInput("WHILE", Token.Type.WHILE);
   }
 
   @Test
@@ -182,7 +172,7 @@ public class ScannerTest {
         oneOf(errorReporter).error(0, 2, "unterminated quoted identifier");
       }
     });
-    Scanner.INSTANCE.scanTokens(sourceReaderWith("\""), errorReporter);
+    DefaultScanner.INSTANCE.scanTokens(sourceReaderWith("\""), errorReporter);
   }
 
   @Test
@@ -193,7 +183,7 @@ public class ScannerTest {
 
   private void validateInput(String input, Token.Type expectedType)
       throws IOException {
-    final List<Token> tokens = Scanner.INSTANCE.scanTokens(
+    final List<Token> tokens = DefaultScanner.INSTANCE.scanTokens(
         sourceReaderWith(input), errorReporter);
     assertThat(tokens.size(), is(equalTo(2)));
     assertThat(tokens.get(0).getType(), is(expectedType));

@@ -22,7 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * A specialized reader used by a {@link Scanner} to read an SQL source.
+ * A specialized reader used by a {@link DefaultScanner} to read an SQL source.
  *
  * @author Carl Harris
  */

@@ -22,6 +22,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -110,7 +112,7 @@ public class ResourceSQLSourceTest {
     final String next = source.next();
     final ResourceSQLSource.ResourceAccessor accessor =
         new ResourceSQLSource.ClassLoaderResourceAccessor(getClass().getClassLoader());
-    final String text = IOUtils.toString(accessor.getResource(resourceName));
+    final String text = IOUtils.toString(accessor.getResource(resourceName), StandardCharsets.UTF_8);
     assertThat(next, is(equalTo(text.substring(0, text.length() - 1))));
     source.close();
   }
@@ -123,8 +125,8 @@ public class ResourceSQLSourceTest {
     final String next = source.next();
     final ResourceSQLSource.ResourceAccessor accessor =
         new ResourceSQLSource.ClassLoaderResourceAccessor(getClass().getClassLoader());
-    final String text = IOUtils.toString(accessor.getResource(resourceName));
-    assertThat(next, is(equalTo(text.trim())));
+    final String text = IOUtils.toString(accessor.getResource(resourceName), StandardCharsets.UTF_8);
+    assertThat(next, is(equalTo(text.substring(0, text.trim().length() - 1))));
     source.close();
   }
 

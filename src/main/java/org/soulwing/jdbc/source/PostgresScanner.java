@@ -25,7 +25,7 @@ import java.io.IOException;
  *
  * @author Carl Harris
  */
-public class PostgresScanner extends Scanner {
+public class PostgresScanner extends DefaultScanner {
 
   public static final Scanner INSTANCE = new PostgresScanner();
 

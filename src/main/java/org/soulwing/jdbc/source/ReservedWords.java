@@ -34,10 +34,9 @@ class ReservedWords {
   private static final String BEGIN = "BEGIN";
   private static final String END = "END";
   private static final String IF = "IF";
-  private static final String FOR = "FOR";
-  private static final String WHILE = "WHILE";
   private static final String LOOP = "LOOP";
   private static final String CASE = "CASE";
+  private static final String TRANSACTION = "TRANSACTION";
 
   private static final Map<String, Token.Type> tokenMap = new HashMap<>();
 
@@ -45,10 +44,9 @@ class ReservedWords {
     tokenMap.put(BEGIN, Token.Type.BEGIN);
     tokenMap.put(END, Token.Type.END);
     tokenMap.put(IF, Token.Type.IF);
-    tokenMap.put(FOR, Token.Type.FOR);
-    tokenMap.put(WHILE, Token.Type.WHILE);
     tokenMap.put(LOOP, Token.Type.LOOP);
     tokenMap.put(CASE, Token.Type.CASE);
+    tokenMap.put(TRANSACTION, Token.Type.TRANSACTION);
   }
 
   private ReservedWords() {}

@@ -33,8 +33,6 @@ public class ReaderSQLSource implements SQLSource {
 
   private static final Set<Token.Type> SPECIAL_ENDS = EnumSet.of(
       Token.Type.IF,
-      Token.Type.FOR,
-      Token.Type.WHILE,
       Token.Type.LOOP,
       Token.Type.CASE);
 
@@ -47,11 +45,15 @@ public class ReaderSQLSource implements SQLSource {
   private int cursor;
 
   public ReaderSQLSource(Reader reader) {
-    this(reader, Scanner.INSTANCE);
+    this(reader, DefaultScanner.INSTANCE);
   }
 
   public ReaderSQLSource(Reader reader, Scanner scanner) {
-    this.reader = new DelegatingSourceReader(reader);
+    this(new DelegatingSourceReader(reader), scanner);
+  }
+
+  ReaderSQLSource(SourceReader reader, Scanner scanner) {
+    this.reader = reader;
     this.scanner = scanner;
   }
 
@@ -92,7 +94,9 @@ public class ReaderSQLSource implements SQLSource {
       final Token.Type type = token.getType();
       if (type == Token.Type.BEGIN) {
         statement.append(token.getLexeme());
-        skipToMatchingEnd(token, statement);
+        if (!isBeginTransaction()) {
+          skipToMatchingEnd(token, statement);
+        }
       }
       else {
         done = type == Token.Type.SEMICOLON || type == Token.Type.EOF;
@@ -110,14 +114,7 @@ public class ReaderSQLSource implements SQLSource {
       final Token token = tokens.get(cursor++);
       statement.append(token.getLexeme());
       if (token.getType() == Token.Type.END) {
-        if (cursor < tokens.size()) {
-          Token nextToken = tokens.get(cursor++);
-          while (cursor < tokens.size() && nextToken.getType() == Token.Type.WHITESPACE) {
-            statement.append(nextToken.getLexeme());
-            nextToken = tokens.get(cursor++);         }
-          statement.append(nextToken.getLexeme());
-          done = !SPECIAL_ENDS.contains(nextToken.getType());
-        }
+        done = !isSpecialEnd();
       }
       else if (token.getType() == Token.Type.BEGIN) {
         skipToMatchingEnd(token, statement);
@@ -129,6 +126,28 @@ public class ReaderSQLSource implements SQLSource {
     }
   }
 
+  private boolean isBeginTransaction() {
+    int start = cursor;
+    Token token = null;
+    while (cursor < tokens.size()) {
+      token = tokens.get(cursor++);
+      if (token.getType() != Token.Type.WHITESPACE) break;
+    }
+    cursor = start;
+    return token != null
+        && token.getType() == Token.Type.TRANSACTION;
+  }
+
+  private boolean isSpecialEnd() {
+    int start = cursor;
+    Token token = null;
+    while (cursor < tokens.size()) {
+      token = tokens.get(cursor++);
+      if (token.getType() != Token.Type.WHITESPACE) break;
+    }
+    cursor = start;
+    return token != null && SPECIAL_ENDS.contains(token.getType());
+  }
 
   @Override
   public void close() throws IOException {

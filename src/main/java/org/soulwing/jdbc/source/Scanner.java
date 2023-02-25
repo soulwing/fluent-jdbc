@@ -23,11 +23,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A lexical scanner for standard SQL.
+ * A lexical scanner for standard SQL and many common variants.
  *
  * @author Carl Harris
  */
-class Scanner {
+public class Scanner {
 
   public static final Scanner INSTANCE = new Scanner();
 

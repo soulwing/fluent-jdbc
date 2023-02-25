@@ -29,7 +29,6 @@ import java.sql.Types;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -73,6 +72,9 @@ public class ParameterTest {
 
   @Mock
   private NClob nClob;
+
+  @Mock
+  private ParameterHandler parameterHandler;
 
   @Mock
   private Connection connection;
@@ -167,6 +169,17 @@ public class ParameterTest {
     });
 
     Parameter.with(nClobHandler).inject(INDEX, preparedStatement);
+  }
+
+  @Test
+  public void testInjectPreparedStatementParameterAccessor() throws Exception {
+    context.checking(new Expectations() {
+      {
+        oneOf(parameterHandler).handleParameter(preparedStatement, INDEX);
+      }
+    });
+
+    Parameter.with(parameterHandler).inject(INDEX, preparedStatement);
   }
 
   @Test

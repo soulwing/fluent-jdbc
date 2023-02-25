@@ -7,7 +7,7 @@
   </parent>
   <groupId>org.soulwing.jdbc</groupId>
   <artifactId>fluent-jdbc</artifactId>
-  <version>2.1.0-SNAPSHOT</version>
+  <version>2.0.3</version>
   <name>${project.artifactId}</name>
   <description>
     A lightweight JDBC facade that provides a fluent API based on the Builder
@@ -29,7 +29,7 @@
     <connection>scm:git:git@github.com:soulwing/${project.artifactId}.git</connection>
     <developerConnection>${project.scm.connection}</developerConnection>
     <url>git@github.com:soulwing/${project.artifactId}.git</url>
-    <tag>HEAD</tag>
+    <tag>2.0.3</tag>
   </scm>
   <build>
     <plugins>

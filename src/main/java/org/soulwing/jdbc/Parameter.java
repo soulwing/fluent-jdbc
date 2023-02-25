@@ -147,7 +147,10 @@ public class Parameter {
       ((CallableStatement) statement).registerOutParameter(parameterIndex, type);
     }
     if (!in) return;
-    if (value instanceof BlobHandler) {
+    if (value instanceof ParameterHandler) {
+      ((ParameterHandler) value).handleParameter(statement, parameterIndex);
+    }
+    else if (value instanceof BlobHandler) {
       final Blob blob = statement.getConnection().createBlob();
       ((BlobHandler) value).prepareBlob(blob);
       statement.setBlob(parameterIndex, blob);

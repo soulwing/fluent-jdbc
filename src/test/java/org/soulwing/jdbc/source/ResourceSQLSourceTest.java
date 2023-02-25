@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 /**
@@ -42,6 +43,10 @@ public class ResourceSQLSourceTest {
   private static final String TEXT_UTF16 = "Resource in UTF-16 encoding";
 
   private static final String UTF_16 = "UTF-16BE";
+
+  private static final String NAME_PG_FUNCTION = "pgFunctionSource.sql";
+
+  private static final String NAME_STD_FUNCTION = "stdFunctionSource.sql";
 
   @Test
   public void testResourceLocationUsingClass() throws Exception {
@@ -94,6 +99,32 @@ public class ResourceSQLSourceTest {
         "classpath:" + TEST_PATH + NAME_UTF16, UTF_16);
     final String next = source.next();
     assertThat(next, is(equalTo(TEXT_UTF16)));
+    source.close();
+  }
+
+  @Test
+  public void testResourceLocationUsingPostgresFunction() throws Exception {
+    final String resourceName = TEST_PATH + NAME_PG_FUNCTION;
+    final ResourceSQLSource source = ResourceSQLSource.with(
+        "classpath:" + resourceName, PostgresScanner.INSTANCE);
+    final String next = source.next();
+    final ResourceSQLSource.ResourceAccessor accessor =
+        new ResourceSQLSource.ClassLoaderResourceAccessor(getClass().getClassLoader());
+    final String text = IOUtils.toString(accessor.getResource(resourceName));
+    assertThat(next, is(equalTo(text.substring(0, text.length() - 1))));
+    source.close();
+  }
+
+  @Test
+  public void testResourceLocationUsingStandardFunction() throws Exception {
+    final String resourceName = TEST_PATH + NAME_STD_FUNCTION;
+    final ResourceSQLSource source = ResourceSQLSource.with(
+        "classpath:" + resourceName);
+    final String next = source.next();
+    final ResourceSQLSource.ResourceAccessor accessor =
+        new ResourceSQLSource.ClassLoaderResourceAccessor(getClass().getClassLoader());
+    final String text = IOUtils.toString(accessor.getResource(resourceName));
+    assertThat(next, is(equalTo(text.trim())));
     source.close();
   }
 

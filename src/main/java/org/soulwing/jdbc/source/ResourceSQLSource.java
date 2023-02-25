@@ -54,6 +54,22 @@ public class ResourceSQLSource extends ReaderSQLSource {
   }
 
   /**
+   * Constructs a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath which will be accessing using the thread context
+   *    class loader
+   * @param encoding character set name
+   * @param scanner scanner to use for SQL dialect
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public ResourceSQLSource(URL location, String encoding, Scanner scanner) {
+    super(openReader(location, encoding), scanner);
+  }
+
+  /**
    * Creates a new SQL source for a resource in the same package as the given
    * class, which uses the {@link #DEFAULT_ENCODING default encoding}.
    * @param name name of the resource
@@ -65,6 +81,22 @@ public class ResourceSQLSource extends ReaderSQLSource {
    */
   public static ResourceSQLSource with(String name, Class<?> relativeToClass) {
     return with(name, relativeToClass, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource in the same package as the given
+   * class, which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param relativeToClass class that provides the package location of the
+   *    resource
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, Class<?> relativeToClass,
+      Scanner scanner) {
+    return with(name, relativeToClass, DEFAULT_ENCODING, scanner);
   }
 
   /**
@@ -84,6 +116,23 @@ public class ResourceSQLSource extends ReaderSQLSource {
   }
 
   /**
+   * Creates a new SQL source for a resource in the same package as the given
+   * class which uses the specified encoding.
+   * @param name name of the resource
+   * @param relativeToClass class that provides the package location of the
+   *    resource
+   * @param encoding character set name
+   * @param scanner scanner to use for the SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, Class<?> relativeToClass,
+      String encoding, Scanner scanner) {
+    return with(name, new ClassResourceAccessor(relativeToClass), encoding, scanner);
+  }
+
+  /**
    * Creates a new SQL source for a resource relative to the root of the
    * given class loader, which uses the {@link #DEFAULT_ENCODING default encoding}.
    * @param name name of the resource
@@ -94,6 +143,21 @@ public class ResourceSQLSource extends ReaderSQLSource {
    */
   public static ResourceSQLSource with(String name, ClassLoader classLoader) {
     return with(name, classLoader, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource relative to the root of the
+   * given class loader, which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param classLoader class loader that will be used to access the resource
+   * @param scanner scanner to use for the SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ClassLoader classLoader,
+      Scanner scanner) {
+    return with(name, classLoader, DEFAULT_ENCODING, scanner);
   }
 
   /**
@@ -112,6 +176,37 @@ public class ResourceSQLSource extends ReaderSQLSource {
   }
 
   /**
+   * Creates a new SQL source for a resource relative to the root of the
+   * given class loader, which uses the specified encoding.
+   * @param name name of the resource
+   * @param classLoader class loader that will be used to access the resource
+   * @param encoding character set name
+   * @param scanner scanner to use for the SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ClassLoader classLoader,
+      String encoding, Scanner scanner) {
+    return with(name, new ClassLoaderResourceAccessor(classLoader), encoding, scanner);
+  }
+
+  /**
+   * Creates a new SQL source for a resource that will be obtained from the
+   * given resource accessor and which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * @param name name of the resource
+   * @param accessor accessor that will be used to obtain a URL for the resource
+   * @param scanner scanner to use for the SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ResourceAccessor accessor,
+      Scanner scanner) {
+    return with(name, accessor, DEFAULT_ENCODING, scanner);
+  }
+
+  /**
    * Creates a new SQL source for a resource that will be obtained from the
    * given resource accessor and which uses the {@link #DEFAULT_ENCODING default encoding}.
    * @param name name of the resource
@@ -126,7 +221,7 @@ public class ResourceSQLSource extends ReaderSQLSource {
 
   /**
    * Creates a new SQL source for a resource that will be obtained from the
-   * given resource accessor and which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * given resource accessor and which uses the specified encoding.
    * @param name name of the resource
    * @param accessor accessor that will be used to obtain a URL for the resource
    * @param encoding character set name
@@ -138,6 +233,23 @@ public class ResourceSQLSource extends ReaderSQLSource {
       String encoding) {
     return with(accessor.getResource(name), encoding);
   }
+
+  /**
+   * Creates a new SQL source for a resource that will be obtained from the
+   * given resource accessor and which uses the specified encoding.
+   * @param name name of the resource
+   * @param accessor accessor that will be used to obtain a URL for the resource
+   * @param encoding character set name
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String name, ResourceAccessor accessor,
+      String encoding, Scanner scanner) {
+    return with(accessor.getResource(name), encoding, scanner);
+  }
+
 
   /**
    * Creates a new SQL source for a resource relative to the root of the
@@ -155,6 +267,25 @@ public class ResourceSQLSource extends ReaderSQLSource {
    */
   public static ResourceSQLSource with(String location) {
     return with(location, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource relative to the root of the
+   * classpath, which uses the {@link #DEFAULT_ENCODING default encoding}.
+   * <p>
+   * The resource will be located using the thread context class loader.
+   *
+   * @param location URL for the resource; may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String location, Scanner scanner) {
+    return with(location, DEFAULT_ENCODING, scanner);
   }
 
   /**
@@ -177,6 +308,27 @@ public class ResourceSQLSource extends ReaderSQLSource {
   }
 
   /**
+   * Creates a new SQL source for a resource relative to the root of the
+   * classpath, which uses the specified encoding.
+   * <p>
+   * The resource will be located using the thread context class loader.
+   *
+   * @param location URL for the resource; may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
+   * @param encoding character set name
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(String location, String encoding,
+      Scanner scanner) {
+    return with(URI.create(location), encoding, scanner);
+  }
+
+  /**
    * Creates a new SQL source for a resource at the specified location,
    * which uses the specified encoding.
    * @param location location of the resource; this URL may use the
@@ -187,9 +339,25 @@ public class ResourceSQLSource extends ReaderSQLSource {
    * @throws SQLResourceNotFoundException if the specified resource is not found
    * @throws SQLInputException if an I/O errors when accessing the resource
    */
-
   public static ResourceSQLSource with(URI location) {
     return with(location, DEFAULT_ENCODING);
+  }
+
+  /**
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+
+  public static ResourceSQLSource with(URI location, Scanner scanner) {
+    return with(location, DEFAULT_ENCODING, scanner);
   }
 
   /**
@@ -206,6 +374,24 @@ public class ResourceSQLSource extends ReaderSQLSource {
    */
   public static ResourceSQLSource with(URI location, String encoding) {
     return new ResourceSQLSource(translate(location), encoding);
+  }
+
+  /**
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath (which will be accessed using the thread context
+   *    class loader)
+   * @param encoding character set name
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(URI location, String encoding,
+      Scanner scanner) {
+    return new ResourceSQLSource(translate(location), encoding, scanner);
   }
 
   /**
@@ -230,6 +416,22 @@ public class ResourceSQLSource extends ReaderSQLSource {
    *    {@code classpath:} scheme to specify a resource relative to the
    *    root of the classpath which will be accessing using the thread context
    *    class loader
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(URL location, Scanner scanner) {
+    return new ResourceSQLSource(location, DEFAULT_ENCODING, scanner);
+  }
+
+  /**
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath which will be accessing using the thread context
+   *    class loader
    * @param encoding character set name
    * @return SQL source
    * @throws SQLResourceNotFoundException if the specified resource is not found
@@ -237,6 +439,24 @@ public class ResourceSQLSource extends ReaderSQLSource {
    */
   public static ResourceSQLSource with(URL location, String encoding) {
     return new ResourceSQLSource(location, encoding);
+  }
+
+  /**
+   * Creates a new SQL source for a resource at the specified location,
+   * which uses the specified encoding.
+   * @param location location of the resource; this URL may use the
+   *    {@code classpath:} scheme to specify a resource relative to the
+   *    root of the classpath which will be accessing using the thread context
+   *    class loader
+   * @param encoding character set name
+   * @param scanner scanner to use for SQL dialect
+   * @return SQL source
+   * @throws SQLResourceNotFoundException if the specified resource is not found
+   * @throws SQLInputException if an I/O errors when accessing the resource
+   */
+  public static ResourceSQLSource with(URL location, String encoding,
+      Scanner scanner) {
+    return new ResourceSQLSource(location, encoding, scanner);
   }
 
   /**
@@ -260,7 +480,7 @@ public class ResourceSQLSource extends ReaderSQLSource {
   /**
    * A {@link ResourceAccessor} based on a {@link ClassLoader}.
    */
-  private static class ClassLoaderResourceAccessor implements ResourceAccessor {
+  static class ClassLoaderResourceAccessor implements ResourceAccessor {
     private final ClassLoader classLoader;
 
     public ClassLoaderResourceAccessor(ClassLoader classLoader) {
@@ -281,10 +501,10 @@ public class ResourceSQLSource extends ReaderSQLSource {
   /**
    * A {@link ResourceAccessor} based on a {@link Class}.
    */
-  private static class ClassResourceAccessor implements ResourceAccessor {
-    private final Class clazz;
+  static class ClassResourceAccessor implements ResourceAccessor {
+    private final Class<?> clazz;
 
-    public ClassResourceAccessor(Class clazz) {
+    public ClassResourceAccessor(Class<?> clazz) {
       this.clazz = clazz;
     }
 

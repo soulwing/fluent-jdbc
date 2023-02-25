@@ -60,7 +60,7 @@ public class ReaderSQLSourceTest {
     ReaderSQLSource source = new ReaderSQLSource(
         resourceReader("testSourceWithNoTerminator.sql", "UTF-8"));
     assertThat(source.next(), is(equalTo(
-        "CREATE TABLE foo ( text VARCHAR(255) )")));
+        "CREATE TABLE foo (text VARCHAR(255))")));
     assertThat(source.next(), is(nullValue()));
     source.close();
   }
@@ -78,11 +78,11 @@ public class ReaderSQLSourceTest {
 
   private void validateStatementSequence(ReaderSQLSource source) {
     assertThat(source.next(), is(equalTo(
-        "CREATE TABLE foo ( text VARCHAR(255) )")));
+        "CREATE TABLE foo (\n  text VARCHAR(255)\n)")));
     assertThat(source.next(), is(equalTo(
         "INSERT INTO foo VALUES('bar')")));
     assertThat(source.next(), is(equalTo(
-        "SELECT * FROM foo")));
+        "SELECT *\nFROM foo")));
     assertThat(source.next(), is(equalTo(
         "DROP TABLE foo")));
     assertThat(source.next(), is(nullValue()));

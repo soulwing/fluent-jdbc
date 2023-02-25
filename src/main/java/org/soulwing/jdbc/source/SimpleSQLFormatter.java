@@ -20,6 +20,7 @@ package org.soulwing.jdbc.source;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.List;
 
 import org.soulwing.jdbc.SQLRuntimeException;
 
@@ -34,23 +35,44 @@ public class SimpleSQLFormatter implements SQLFormatter {
   @Override
   public String format(String sql) {
     try {
-      Lexer lexer = new Lexer(new StringReader(sql));
-      Lexer.Token token = lexer.next();
-      StringBuilder statement = new StringBuilder();
-      while (token != null) {
-        if (token.type == Lexer.Token.Type.WHITESPACE) {
-          statement.append(' ');
-        }
-        else if (token.type != Lexer.Token.Type.COMMENT) {
-          statement.append(token.value);
-        }
-        token = lexer.next();
+      final SimpleErrorReporter errorReporter = new SimpleErrorReporter();
+      final List<Token> tokens = Scanner.INSTANCE.scanTokens(
+          new DelegatingSourceReader(new StringReader(sql.trim())), errorReporter);
+      if (errorReporter.hasError()) {
+        // we don't recognize the lexical structure, so don't bother formatting
+        return sql;
       }
-      return statement.toString();
+      final StringBuilder statement = new StringBuilder();
+      for (final Token token : tokens) {
+        if (token.getType() == Token.Type.WHITESPACE) {
+          statement.append(" ");
+        }
+        else if (token.getType() != Token.Type.COMMENT) {
+          statement.append(token.getLexeme());
+        }
+      }
+      return statement.toString().trim();
     }
     catch (IOException ex) {
       throw new SQLRuntimeException(ex.getMessage(), ex);
     }
   }
+
+  private static class SimpleErrorReporter implements ErrorReporter {
+
+    private boolean hasError;
+
+    @Override
+    public boolean hasError() {
+      return hasError;
+    }
+
+    @Override
+    public void error(int offset, int length, String message) {
+      hasError = true;
+    }
+
+  }
+
 
 }

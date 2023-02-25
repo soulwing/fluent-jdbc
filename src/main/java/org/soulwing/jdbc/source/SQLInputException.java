@@ -18,6 +18,9 @@
  */
 package org.soulwing.jdbc.source;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.soulwing.jdbc.SQLRuntimeException;
 
 /**
@@ -28,8 +31,66 @@ import org.soulwing.jdbc.SQLRuntimeException;
  */
 public class SQLInputException extends SQLRuntimeException {
 
+  public static class Error {
+    public final int offset;
+    public final int length;
+    public final String message;
+
+    public Error(int offset, int length, String message) {
+      this.offset = offset;
+      this.length = length;
+      this.message = message;
+    }
+  }
+
+  private final List<Error> errors = new ArrayList<>();
+
+  public SQLInputException() {
+    super("SQL input error(s)");
+  }
+
+  public SQLInputException(int offset, int length, String message) {
+    super("SQL input error");
+    addError(offset, length, message);
+  }
+
   public SQLInputException(String message, Throwable cause) {
     super(message, cause);
+  }
+
+  void addError(int offset, int length, String message) {
+    errors.add(new Error(offset, length, message));
+  }
+
+  public List<Error> getErrors() {
+    return new ArrayList<>(errors);
+  }
+
+  @Override
+  public String getMessage() {
+    if (errors.isEmpty()) return super.getMessage();
+    return errorList(super.getMessage());
+  }
+
+  @Override
+  public String getLocalizedMessage() {
+    if (errors.isEmpty()) return super.getLocalizedMessage();
+    return errorList(super.getLocalizedMessage());
+  }
+
+  private String errorList(String summary) {
+    final StringBuilder sb = new StringBuilder();
+    sb.append(summary);
+    sb.append(": ");
+    for (int i = 0; i < errors.size(); i++) {
+      final Error error = errors.get(i);
+      sb.append(String.format("(offset=%d, length=%d) %s",
+          error.offset, error.length, error.message));
+      if (i + 1 < errors.size()) {
+        sb.append(", ");
+      }
+    }
+    return sb.toString();
   }
 
 }

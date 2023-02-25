@@ -18,9 +18,11 @@
  */
 package org.soulwing.jdbc.source;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * An {@link SQLSource} that reads statements from a {@link Reader}.
@@ -29,28 +31,108 @@ import java.io.Reader;
  */
 public class ReaderSQLSource implements SQLSource {
 
-  private final Parser parser;
+  private static final Set<Token.Type> SPECIAL_ENDS = EnumSet.of(
+      Token.Type.IF,
+      Token.Type.FOR,
+      Token.Type.WHILE,
+      Token.Type.LOOP,
+      Token.Type.CASE);
+
+  private final SQLInputErrorReporter reporter = new SQLInputErrorReporter();
+
+  private final SourceReader reader;
+  private final Scanner scanner;
+
+  private List<Token> tokens;
+  private int cursor;
 
   public ReaderSQLSource(Reader reader) {
-    if (!(reader instanceof BufferedReader)) {
-      reader = new BufferedReader(reader);
-    }
-    this.parser = new Parser(reader);
+    this(reader, Scanner.INSTANCE);
+  }
+
+  public ReaderSQLSource(Reader reader, Scanner scanner) {
+    this.reader = new DelegatingSourceReader(reader);
+    this.scanner = scanner;
   }
 
   @Override
   public String next() throws SQLInputException {
-    try {
-      return parser.next();
+    if (reporter.hasError()) {
+      throw reporter.getException();
     }
-    catch (IOException ex) {
-      throw new SQLInputException(ex.getMessage(), ex);
+    if (tokens == null) {
+      if (scanner == null) {
+        throw new IllegalArgumentException("scanner is required");
+      }
+      try {
+        tokens = scanner.scanTokens(reader, reporter);
+      }
+      catch (IOException ex) {
+        reporter.error(reader.getStart(), reader.getCurrent(), ex.getMessage());
+      }
+      if (reporter.hasError()) {
+        throw reporter.getException();
+      }
+    }
+    String statement = reassembleStatement();
+    while (statement != null && statement.isEmpty()) {
+      statement = reassembleStatement();
+    }
+    return statement;
+  }
+
+  private String reassembleStatement() {
+    if (cursor >= tokens.size()) {
+      return null;
+    }
+    final StringBuilder statement = new StringBuilder();
+    boolean done = false;
+    while (cursor < tokens.size() && !done) {
+      final Token token = tokens.get(cursor++);
+      final Token.Type type = token.getType();
+      if (type == Token.Type.BEGIN) {
+        statement.append(token.getLexeme());
+        skipToMatchingEnd(token, statement);
+      }
+      else {
+        done = type == Token.Type.SEMICOLON || type == Token.Type.EOF;
+        if (!done) {
+          statement.append(token.getLexeme());
+        }
+      }
+    }
+    return statement.toString().trim();
+  }
+
+  private void skipToMatchingEnd(Token begin, StringBuilder statement) {
+    boolean done = false;
+    while (cursor < tokens.size() && !done) {
+      final Token token = tokens.get(cursor++);
+      statement.append(token.getLexeme());
+      if (token.getType() == Token.Type.END) {
+        if (cursor < tokens.size()) {
+          Token nextToken = tokens.get(cursor++);
+          while (cursor < tokens.size() && nextToken.getType() == Token.Type.WHITESPACE) {
+            statement.append(nextToken.getLexeme());
+            nextToken = tokens.get(cursor++);         }
+          statement.append(nextToken.getLexeme());
+          done = !SPECIAL_ENDS.contains(nextToken.getType());
+        }
+      }
+      else if (token.getType() == Token.Type.BEGIN) {
+        skipToMatchingEnd(token, statement);
+      }
+    }
+    if (!done) {
+      throw new SQLInputException(begin.getOffset(), begin.getLength(),
+          "mismatched BEGIN");
     }
   }
 
+
   @Override
   public void close() throws IOException {
-    parser.close();
+    reader.close();
   }
 
 }

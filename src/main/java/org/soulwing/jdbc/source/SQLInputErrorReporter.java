@@ -1,7 +1,7 @@
 /*
- * File created on Aug 5, 2015
+ * File created on Feb 25, 2023
  *
- * Copyright (c) 2015 Carl Harris, Jr
+ * Copyright (c) 2023 Carl Harris, Jr
  * and others as noted
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,31 +18,27 @@
  */
 package org.soulwing.jdbc.source;
 
-import java.io.StringReader;
-
 /**
- * An {@link SQLSource} that reads SQL statements from a string.
+ * An {@link ErrorReporter} that bundles errors into an {@link SQLInputException}.
  *
  * @author Carl Harris
  */
-public class StringSQLSource extends ReaderSQLSource {
+class SQLInputErrorReporter implements ErrorReporter {
 
-  /**
-   * Constructs a new instance.
-   * @param sql source SQL
-   */
-  public StringSQLSource(String sql) {
-    super(new StringReader(sql));
+  private final SQLInputException exception = new SQLInputException();
+
+  public SQLInputException getException() {
+    return exception;
   }
 
-  /**
-   * Constructs a new instance.
-   * @param sql source SQL
-   * @param scanner scanner to use for SQL dialect
-   */
-  public StringSQLSource(String sql, Scanner scanner) {
-    super(new StringReader(sql), scanner);
+  @Override
+  public boolean hasError() {
+    return !exception.getErrors().isEmpty();
   }
 
+  @Override
+  public void error(int offset, int length, String message) {
+    exception.addError(offset, length, message);
+  }
 
 }
